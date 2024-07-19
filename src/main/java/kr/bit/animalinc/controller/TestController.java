@@ -14,4 +14,8 @@ public class TestController {
     public Map<String, String > test1() {
         return Map.of("test", "success");
     }
+    @GetMapping("/test2")
+    public Map<String, String > test2() {
+        return Map.of("test2", "success2");
+    }
 }
