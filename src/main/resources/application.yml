@@ -5,6 +5,11 @@ spring:
     username: animalinc
     password: 1234
 
+  servlet:
+    multipart:
+      max-request-size: 40MB
+      max-file-size: 10MB
+
   jpa:
 
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -14,7 +19,7 @@ spring:
 
     hibernate:
       ddl-auto: create
-      #      ddl-auto: update
+#      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
