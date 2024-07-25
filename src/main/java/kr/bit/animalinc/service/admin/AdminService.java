@@ -7,6 +7,7 @@ import kr.bit.animalinc.repository.admin.TierCountRepository;
 import kr.bit.animalinc.repository.admin.UserCountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class AdminService {
     private final TierCountRepository tierCountRepository;
     private final UserCountRepository userCountRepository;
 
+    // 유저 Ban에 관한 CRUD
     @Transactional
     public BanList addBanList(BanList banList) {
         log.warn("\naddBanList : " + banList.toString());
@@ -59,9 +61,20 @@ public class AdminService {
         return "success";
     }
 
+    // TierCount에 대한 CRUD
     @Transactional
     public TierCount addTierCount(TierCount tierCount) {
         log.warn("\ninsert TierCount : " + tierCount);
-        return tierCountRepository.save(tierCount);
+        TierCount input = TierCount.builder()
+                .count(tierCount.getCount())
+                .tier(tierCount.getTier())
+                .tuDate(tierCount.getTuDate())
+                .build();
+
+        return tierCountRepository.save(input);
     }
+
+    // UserCount에 대한 CRUD
+
+
 }

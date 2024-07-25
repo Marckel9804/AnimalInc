@@ -1,10 +1,13 @@
 package kr.bit.animalinc.entity.board;
 
 import jakarta.persistence.*;
+import kr.bit.animalinc.entity.user.Users;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 @Entity
 @Data
@@ -17,7 +20,18 @@ public class BoardFAQ {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long faq_id;
 
-    @Column(length = 50, nullable = false)
-    private String qUsername;
+    private String title;
+    private String code;
+    private String reportUserNum;
+    private String adminUserNum;
+    private Date reportDate;
+
+    private String content;
+    // private List<File> files;
+
+    @ManyToOne
+    @JoinColumn(name = "user_num", nullable = false)
+    private Users qUser;
+
 
 }
