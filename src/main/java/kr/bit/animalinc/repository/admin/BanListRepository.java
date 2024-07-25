@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BanListRepository extends JpaRepository<BanList, Long> {
+    public BanList findByUsernum(long user_num);
 }
