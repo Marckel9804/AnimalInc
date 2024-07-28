@@ -13,27 +13,28 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(exclude = "memRoleList")
 @Getter
+@Setter
 public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long user_num;
 
-    private String user_id;
-    private String user_realname;
-    private String user_nickname;
-    private String user_pw;
-    private String user_pwConfirm;
-    private String user_phone;
-    private String user_email;
-    private Date user_birthdate;
-    private int user_point;
-    private int user_ruby;
-    private String user_grade;
-    private int user_reportnum;
-    private String user_item;
+    private String userId;
+    private String userRealname;
+    private String userNickname;
+    private String userPw;
+    private String userPwConfirm;
+    private String userPhone;
+    private String userEmail;
+    private Date userBirthdate;
+    private int userPoint;
+    private int userRuby;
+    private String userGrade;
+    private int userReportnum;
+    private String userItem;
+    private String socialProvider;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memRoleList = new ArrayList<>();
-
 }
