@@ -2,6 +2,7 @@ package kr.bit.animalinc.service.admin;
 
 import kr.bit.animalinc.entity.admin.BanList;
 import kr.bit.animalinc.entity.admin.TierCount;
+import kr.bit.animalinc.entity.admin.UserCount;
 import kr.bit.animalinc.repository.admin.BanListRepository;
 import kr.bit.animalinc.repository.admin.TierCountRepository;
 import kr.bit.animalinc.repository.admin.UserCountRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,7 +76,70 @@ public class AdminService {
         return tierCountRepository.save(input);
     }
 
+    @Transactional
+    public TierCount getTierCount(Date date) {
+        TierCount result = tierCountRepository.findByTuDate(date);
+        log.info("\nresult TierCount : " + result);
+        return result;
+    }
+    @Transactional
+    public List<TierCount> getAllTierCount() {
+        List<TierCount> result = tierCountRepository.findAll();
+        return result;
+    }
+
+    @Transactional
+    public TierCount updateTierCount(TierCount tierCount) {
+
+        TierCount target = tierCountRepository.findByTuDate(tierCount.getTuDate());
+        target.setCount(tierCount.getCount());
+        target.setTier(tierCount.getTier());
+
+        TierCount result = tierCountRepository.save(target);
+        return result;
+    }
+
+    @Transactional
+    public String deleteTierCount(Long id) {
+        tierCountRepository.deleteById(id);
+        return "success";
+    }
+
     // UserCount에 대한 CRUD
 
+    @Transactional
+    public UserCount addUserCount(UserCount userCount) {
+        UserCount input = UserCount.builder()
+                .count(userCount.getCount())
+                .cuDate(userCount.getCuDate())
+                .build();
+        UserCount result = userCountRepository.save(input);
+        return result;
+    }
 
+    @Transactional
+    public UserCount getUserCount(Date date) {
+        UserCount result = userCountRepository.findByCuDate(date);
+        return result;
+    }
+
+    @Transactional
+    public List<UserCount> getAllUserCount() {
+        List<UserCount> result = userCountRepository.findAll();
+        return result;
+    }
+
+    @Transactional
+    public UserCount updateUserCount(UserCount userCount) {
+        UserCount target = userCountRepository.findByCuDate(userCount.getCuDate());
+        target.setCount(userCount.getCount());
+        UserCount result = userCountRepository.save(target);
+        return result;
+    }
+
+    @Transactional
+    public String deleteUserCount(Long id) {
+        userCountRepository.deleteById(id);
+        return "success";
+    }
 }
