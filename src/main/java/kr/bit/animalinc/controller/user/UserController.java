@@ -30,18 +30,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> registerInfo) {
-        String userId = registerInfo.get("userId");
-        String password = registerInfo.get("password");
-        String name = registerInfo.get("name");
-        String email = registerInfo.get("email");
-        String birthdate = registerInfo.get("birthdate");
-
-        Users user = userService.register(userId, password, name, email, birthdate);
-        if (user == null) {
-            return ResponseEntity.status(400).body("User could not be created");
-        }
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> register(Users user) {
+        return ResponseEntity.ok(userService.register(user));
     }
 
     @PostMapping("/social-login")
@@ -51,10 +41,6 @@ public class UserController {
         String name = userInfo.get("name");
         String email = userInfo.get("email");
 
-        Users user = userService.handleSocialLogin(socialId, platform, name, email);
-        if (user == null) {
-            return ResponseEntity.status(400).body("User could not be created or found");
-        }
-        return ResponseEntity.ok(user);
+        return null;
     }
 }
