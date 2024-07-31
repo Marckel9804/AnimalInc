@@ -5,7 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.util.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,16 +26,15 @@ public class JWTFilter extends OncePerRequestFilter {
     //로그인 - 받아온 서버요청 - 서버쪽 토큰검증
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+        log.info("Request URI: {}", requestURI);
 
-        String str = request.getRequestURI();
-        log.info(str);
-
-        if (str.startsWith("/bit/member")) {
-            return true;
-        }
-
-
-        return false;
+        // 인증이 필요 없는 경로를 명시
+        return requestURI.startsWith("/api/user/register") ||
+                requestURI.startsWith("/api/user/login") ||
+                requestURI.startsWith("/api/user/send-verification-code") ||
+                requestURI.startsWith("/api/user/verify-email") ||
+                requestURI.startsWith("/api/user/check-nickname");
     }
 
     //jwt토큰 검증 / 인증정보 설정 -> 필터 핵심
@@ -49,19 +48,19 @@ public class JWTFilter extends OncePerRequestFilter {
             String accessToken=authstr.substring(7); //실제 토큰 추출
             Map<String, Object> claims= JWTUtil.validateToken(accessToken);
 
-            String email=(String) claims.get("email");
-            String password=(String) claims.get("password");
-            String nickname=(String) claims.get("nickname");
+            String email=(String) claims.get("userEmail");
+            String password=(String) claims.get("userPw");
+            String nickname=(String) claims.get("userNickname");
             Boolean slogin=(Boolean) claims.get("slogin");
             List<String> roleName=(List<String>) claims.get("roleName");
 
 
 
-            Users users = new Users(email, password, nickname, slogin.booleanValue(), roleName);
+            UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin.booleanValue(), roleName);
 
             //사용자 정보 기반으로 인증토큰 생성
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                    = new UsernamePasswordAuthenticationToken(users, password, users.getAuthorities());
+                    = new UsernamePasswordAuthenticationToken(usersDTO, password, usersDTO.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 

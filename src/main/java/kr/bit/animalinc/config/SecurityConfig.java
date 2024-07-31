@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -72,6 +74,17 @@ public class SecurityConfig {
         //jwt검증이 우선이고 그 다음 사용자 정보 기반으로 한 인증토큰 추가해라
         httpSecurity.addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class);
 
+        httpSecurity.authorizeHttpRequests(authorize -> {
+            authorize
+                    .requestMatchers("/api/user/**", "/api/auth/**", "/api/oauth2/**").permitAll()
+                    .anyRequest().authenticated();
+        });
+
         return httpSecurity.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

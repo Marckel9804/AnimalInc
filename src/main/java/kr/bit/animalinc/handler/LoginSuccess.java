@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.util.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -21,8 +21,8 @@ public class LoginSuccess implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         //로그인에 성공했을때 사용자 정보 다 가져옴
-        Users users = (Users) authentication.getPrincipal();
-        Map<String, Object> claims = users.getClaims();
+        UsersDTO usersDTO = (UsersDTO) authentication.getPrincipal();
+        Map<String, Object> claims = usersDTO.getClaims();
         //
         String accessToken= JWTUtil.generateToken(claims,10);
         String refreshToken=JWTUtil.generateToken(claims,60*24);
