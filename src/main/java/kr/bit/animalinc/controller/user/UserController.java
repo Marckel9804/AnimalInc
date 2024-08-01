@@ -82,12 +82,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UsersDTO userDTO) {
-        log.info("Login attempt with email: {}", userDTO.getUserEmail());
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
 
-        Users user = userService.login(userDTO.getUserEmail(), userDTO.getUserPw());
+        String userEmail = request.get("userEmail");
+        String userPw = request.get("userPw");
+
+        if (userEmail == null || userPw == null) {
+            log.error("Email or Password is null");
+            return ResponseEntity.status(400).body("Email or Password is missing");
+        }
+
+        Users user = userService.login(userEmail, userPw);
+
         if (user == null) {
-            log.error("User not found or password mismatch for email: {}", userDTO.getUserEmail());
+            log.error("User not found or password mismatch for email: {}", userEmail);
             return ResponseEntity.status(401).body("Invalid Email or Password");
         }
 
@@ -105,10 +113,54 @@ public class UserController {
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
 
-        log.info("Login successful for user: {}", userDTO.getUserEmail());
         log.info("Access Token: {}", accessToken);
         log.info("Refresh Token: {}", refreshToken);
 
         return ResponseEntity.ok(tokens);
+    }
+
+    @PostMapping("/social-login")
+    public ResponseEntity<?> socialLogin(@RequestBody Map<String, String> request) {
+        String platform = request.get("platform");
+        String name = request.get("name");
+        String email = request.get("email");
+        String birthdate = request.get("birthdate");
+        log.info("Social login request for platform: {}, email: {}", platform, email);
+
+        Users user = userService.socialLogin(platform, name, email, birthdate);
+
+        if (user == null) {
+            return ResponseEntity.status(401).body("Invalid social login");
+        }
+
+        List<String> roles = user.getMemRoleList().stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
+
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
+        Map<String, Object> claims = authenticatedUser.getClaims();
+
+        String accessToken = jwtUtil.generateToken(claims, 10);
+        String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
+        Map<String, Object> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        log.info("Social login successful for user: {}", email);
+        log.info("Access Token: {}", accessToken);
+        log.info("Refresh Token: {}", refreshToken);
+
+        return ResponseEntity.ok(tokens);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+        String userEmail = request.get("userEmail");
+        log.info("Logging out user with email: {}", userEmail);
+
+        userService.logout(userEmail);
+
+        log.info("Logout successful for user: {}", userEmail);
+        return ResponseEntity.ok("Logout successful");
     }
 }
