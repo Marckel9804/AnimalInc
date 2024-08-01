@@ -1,9 +1,6 @@
 package kr.bit.animalinc.entity.game;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +13,7 @@ public class GameUsersStatus {
     @Id
     @ManyToOne
     @JoinColumn(name = "gameRoomId")
-    private String gameRoomId;
+    private GameRoom gameRoom;
 
     private long userNum;
     private int lottery;

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -14,7 +16,7 @@ public class GameRoom {
     @Id
     private String gameRoomID;
 
-    private int gameTime;
+    private Date gameTime;
     private int Turn;
     private String roomName;
     private String tier;
