@@ -32,6 +32,13 @@ public class JWTFilter extends OncePerRequestFilter {
         // 인증이 필요 없는 경로를 명시
         return requestURI.startsWith("/api/user/register") ||
                 requestURI.startsWith("/api/user/login") ||
+                requestURI.startsWith("/api/user/social-login") ||
+                requestURI.startsWith("/api/user/update-profile") ||
+                requestURI.startsWith("/api/user/get-profile") ||
+                requestURI.startsWith("/api/user/delete") ||
+                requestURI.startsWith("/api/user/update-password") ||
+                requestURI.startsWith("/api/user/search-user") ||
+                requestURI.startsWith("/api/user/logout") ||
                 requestURI.startsWith("/api/user/send-verification-code") ||
                 requestURI.startsWith("/api/user/verify-email") ||
                 requestURI.startsWith("/api/user/check-nickname");
@@ -64,7 +71,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
-            filterChain.doFilter(request,response);  //다음 필터로 요청 전달
         }
         catch (Exception e){
 
@@ -75,9 +81,10 @@ public class JWTFilter extends OncePerRequestFilter {
             PrintWriter printWriter=response.getWriter();
             printWriter.println(str);
             printWriter.close();
+            return;
         }
 
-
+        filterChain.doFilter(request,response);  //다음 필터로 요청 전달
 
     }
 

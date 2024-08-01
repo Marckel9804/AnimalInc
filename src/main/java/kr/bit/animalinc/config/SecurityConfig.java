@@ -1,7 +1,5 @@
 package kr.bit.animalinc.config;
 
-import kr.bit.animalinc.handler.LoginFail;
-import kr.bit.animalinc.handler.LoginSuccess;
 import kr.bit.animalinc.security.filter.JWTFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,20 +63,20 @@ public class SecurityConfig {
 
         httpSecurity.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        httpSecurity.formLogin(config ->{
+/*        httpSecurity.formLogin(config ->{
             config.loginPage("/api/user/login");
             config.successHandler(new LoginSuccess());
             config.failureHandler(new LoginFail());
-        });
-
-        //jwt검증이 우선이고 그 다음 사용자 정보 기반으로 한 인증토큰 추가해라
-        httpSecurity.addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class);
+        });*/
 
         httpSecurity.authorizeHttpRequests(authorize -> {
             authorize
                     .requestMatchers("/api/user/**", "/api/auth/**", "/api/oauth2/**").permitAll()
                     .anyRequest().authenticated();
         });
+
+        //jwt검증이 우선이고 그 다음 사용자 정보 기반으로 한 인증토큰 추가해라
+        httpSecurity.addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

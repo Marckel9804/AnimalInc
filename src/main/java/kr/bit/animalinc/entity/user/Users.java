@@ -3,7 +3,7 @@ package kr.bit.animalinc.entity.user;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class Users{
     private String userRealname;
     private String userNickname;
     private String userPw;
-    private Date userBirthdate;
+    private LocalDate userBirthdate;
     private int userPoint; //회원이 가지고 있는 포인트
     private int userRuby; //회원이 가지고 있는 루비(캐시)
     private String userGrade; //회원의 등급(티어)
