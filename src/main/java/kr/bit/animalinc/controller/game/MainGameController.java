@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/game")
+@RequestMapping("/api/user/game")
 @Slf4j
 @CrossOrigin("*")
 public class MainGameController {
