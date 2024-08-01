@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Data
@@ -13,9 +15,12 @@ public class GameUsersStatus {
     @Id
     @ManyToOne
     @JoinColumn(name = "gameRoomId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private GameRoom gameRoom;
 
+    @Id
     private long userNum;
+
     private int lottery;
     private int fakeNews;
     private int timeMachine;

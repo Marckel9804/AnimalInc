@@ -1,9 +1,13 @@
 package kr.bit.animalinc.controller.game;
 
-import kr.bit.animalinc.entity.game.GameStatusStock;
+import kr.bit.animalinc.entity.game.GameRoom;
+import kr.bit.animalinc.repository.game.GameRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -12,10 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class MainGameController {
 
-    @GetMapping("/get/status/{game_room_id}")
-    public GameStatusStock getStatus(@PathVariable("game_room_id") String game_room_id) {
+    @Autowired
+    private GameRoomRepository gameRoomRepository;
 
-        GameStatusStock gameStatusStock = new GameStatusStock();
-        return gameStatusStock;
+    @GetMapping("/roomInfo/{roomId}")
+    public Optional<GameRoom> getRoomInfo(@PathVariable("roomId") String roomId) {
+        System.out.println("으아아아");
+        return gameRoomRepository.findById(roomId);
     }
 }
