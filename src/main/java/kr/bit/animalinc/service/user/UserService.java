@@ -1,5 +1,6 @@
 package kr.bit.animalinc.service.user;
 
+import kr.bit.animalinc.entity.user.MemberRole;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,10 @@ public class UserService {
 
     public Users register(Users user) {
         user.setUserPw(passwordEncoder.encode(user.getUserPw()));
+
+        //USER 권한 설정
+        user.addRole(MemberRole.USER);
+
         return userRepository.save(user);
     }
 

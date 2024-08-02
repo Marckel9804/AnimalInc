@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class UsersDTO extends User {
     private String userRealname;
     private String userNickname;
     private String userPw;
-    private Date userBirthdate;
+    private LocalDate userBirthdate;
     private int userPoint; //회원이 가지고 있는 포인트
     private int userRuby; //회원이 가지고 있는 루비(캐시)
     private String userGrade; //회원의 등급(티어)
@@ -48,9 +48,9 @@ public class UsersDTO extends User {
 
     public Map<String, Object> getClaims() {
         Map<String, Object> map = new HashMap<>();
-        map.put("email", userEmail);
-        map.put("password", userPw);
-        map.put("nickname", userNickname);
+        map.put("userEmail", userEmail);
+        map.put("userPw", userPw);
+        map.put("userNickname", userNickname);
         map.put("slogin", slogin);
         map.put("roleName", roleName);
         return map;
