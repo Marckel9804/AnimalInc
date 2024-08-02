@@ -1,5 +1,6 @@
 package kr.bit.animalinc.service.user;
 
+import kr.bit.animalinc.entity.user.MemberRole;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -16,10 +16,6 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public Optional<Users> findByEmail(String email) {
-        return userRepository.findByUserEmail(email);
-    }
 
     public Users login(String userEmail, String password) {
         log.info("Attempting login for email: {}", userEmail);
@@ -43,6 +39,10 @@ public class UserService {
 
     public Users register(Users user) {
         user.setUserPw(passwordEncoder.encode(user.getUserPw()));
+
+        //USER 권한 설정
+        user.addRole(MemberRole.USER);
+
         return userRepository.save(user);
     }
 
@@ -55,12 +55,9 @@ public class UserService {
         return !exists;
     }
 
-    public Users socialLogin(String platform, String name, String email, String birthdate) {
+    public Users socialLogin(String name, String email) {
         log.info("Attempting social login for email: {}", email);
         Optional<Users> optionalUser = userRepository.findByUserEmail(email);
-
-        LocalDate birthDateParsed = LocalDate.parse(birthdate); // birthdate를 LocalDate로 파싱
-
 
         Users user;
         if (optionalUser.isPresent()) {
@@ -70,7 +67,6 @@ public class UserService {
             user = new Users();
             user.setUserEmail(email);
             user.setUserRealname(name);
-            user.setUserBirthdate(birthDateParsed);
             user.setSlogin(true); // 소셜 로그인 상태 설정
             user.setUserNickname(null); // 초기에는 닉네임이 없음
             user = userRepository.save(user);

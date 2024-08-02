@@ -121,13 +121,11 @@ public class UserController {
 
     @PostMapping("/social-login")
     public ResponseEntity<?> socialLogin(@RequestBody Map<String, String> request) {
-        String platform = request.get("platform");
-        String name = request.get("name");
         String email = request.get("email");
-        String birthdate = request.get("birthdate");
-        log.info("Social login request for platform: {}, email: {}", platform, email);
+        String name = request.get("name");
+        log.info("Social login request for email: {}", email);
 
-        Users user = userService.socialLogin(platform, name, email, birthdate);
+        Users user = userService.socialLogin(name, email);
 
         if (user == null) {
             return ResponseEntity.status(401).body("Invalid social login");
@@ -152,6 +150,7 @@ public class UserController {
 
         return ResponseEntity.ok(tokens);
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
