@@ -107,7 +107,7 @@ public class UserController {
         UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
-        String accessToken = jwtUtil.generateToken(claims, 10);
+        String accessToken = jwtUtil.generateToken(claims, 30);
         String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
         Map<String, Object> tokens = new HashMap<>();
         tokens.put("accessToken", accessToken);
@@ -122,10 +122,9 @@ public class UserController {
     @PostMapping("/social-login")
     public ResponseEntity<?> socialLogin(@RequestBody Map<String, String> request) {
         String email = request.get("email");
-        String name = request.get("name");
-        log.info("Social login request for email: {}", email);
+        String userRealname = request.get("name");
 
-        Users user = userService.socialLogin(name, email);
+        Users user = userService.socialLogin(userRealname, email);
 
         if (user == null) {
             return ResponseEntity.status(401).body("Invalid social login");
@@ -138,15 +137,11 @@ public class UserController {
         UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
-        String accessToken = jwtUtil.generateToken(claims, 10);
+        String accessToken = jwtUtil.generateToken(claims, 30);
         String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
         Map<String, Object> tokens = new HashMap<>();
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
-
-        log.info("Social login successful for user: {}", email);
-        log.info("Access Token: {}", accessToken);
-        log.info("Refresh Token: {}", refreshToken);
 
         return ResponseEntity.ok(tokens);
     }
