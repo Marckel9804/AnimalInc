@@ -104,6 +104,7 @@ public class UserController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
+        log.info("user: {}",user);
         UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
@@ -136,6 +137,7 @@ public class UserController {
         List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
+
 
         UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();

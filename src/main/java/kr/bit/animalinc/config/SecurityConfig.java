@@ -71,7 +71,7 @@ public class SecurityConfig {
 
         httpSecurity.authorizeHttpRequests(authorize -> {
             authorize
-                    .requestMatchers("/api/user/**", "/api/auth/**", "/api/oauth2/**").permitAll()
+                    .requestMatchers("/api/user/**", "/api/auth/**", "/api/oauth2/**", "/game/**").permitAll()
                     .anyRequest().authenticated();
         });
 

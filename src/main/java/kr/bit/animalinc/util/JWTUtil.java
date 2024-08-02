@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class JWTUtil {  //1.jwt 생성하고 2.검증
 
     private static String key="1234567890123456789012345678901234567890";  //jwt서명에 사용할 비밀 키
@@ -24,6 +26,7 @@ public class JWTUtil {  //1.jwt 생성하고 2.검증
 
         try{
             key= Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
+            log.info("\n\nmap 내용" + map.toString());
         }
         catch (Exception e){
             throw new RuntimeException(e.getMessage());

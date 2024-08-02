@@ -52,14 +52,21 @@ public class JWTFilter extends OncePerRequestFilter {
 
         //Bearer ej~~~~~
         try{
+            log.info("Header :{}", authstr);
+            log.info("Header substring :{}", authstr.substring(7));
             String accessToken=authstr.substring(7); //실제 토큰 추출
             Map<String, Object> claims= JWTUtil.validateToken(accessToken);
 
-            String email=(String) claims.get("userEmail");
-            String password=(String) claims.get("userPw");
-            String nickname=(String) claims.get("userNickname");
+            String email=(String) claims.get("email");
+            String password=(String) claims.get("password");
+            String nickname=(String) claims.get("nickname");
             Boolean slogin=(Boolean) claims.get("slogin");
             List<String> roleName=(List<String>) claims.get("roleName");
+
+            System.out.println("email:"+email+" userPw:"+password+" nickname:"+nickname+" slogin:"+slogin);
+            for(String r : roleName){
+                System.out.println("roleName:"+r);
+            }
 
 
 
@@ -73,7 +80,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         }
         catch (Exception e){
-
+            log.error("JWT validation error: ", e);
             Gson gson=new Gson();
             String str=gson.toJson(Map.of("error","error_token"));
 

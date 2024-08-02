@@ -7,11 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user/game")
+@RequestMapping("/game")
 @Slf4j
 @CrossOrigin("*")
 public class MainGameController {
@@ -19,9 +20,9 @@ public class MainGameController {
     @Autowired
     private GameRoomRepository gameRoomRepository;
 
-    @GetMapping("/roomInfo/{roomId}")
-    public Optional<GameRoom> getRoomInfo(@PathVariable("roomId") String roomId) {
+    @PostMapping("/roomInfo")
+    public Optional<GameRoom> getRoomInfo(@RequestBody Map<String, String> roomId) {
         System.out.println("으아아아");
-        return gameRoomRepository.findById(roomId);
+        return gameRoomRepository.findById(roomId.get("roomId"));
     }
 }
