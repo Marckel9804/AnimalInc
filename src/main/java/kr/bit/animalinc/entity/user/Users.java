@@ -35,5 +35,6 @@ public class Users{
     @Builder.Default
     private List<MemberRole> memRoleList = new ArrayList<>();
 
-    private void addRole(MemberRole role) {memRoleList.add(role);}
+    //회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다. 관리자(ADMIN)는 0으로 저장
+    public void addRole(MemberRole role) {memRoleList.add(role);}
 }

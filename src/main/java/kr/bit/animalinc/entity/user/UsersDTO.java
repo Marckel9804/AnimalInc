@@ -35,27 +35,24 @@ public class UsersDTO extends User {
 
     private List<String> roleName; //회원 역할(관리자와 회원 권한을 구분하기 위해서)
 
-    public UsersDTO(String userEmail, String userPw, String userNickname, boolean slogin
-            , List<String> roleName){
+    public UsersDTO(String userEmail, String userPw, String userNickname, boolean slogin, List<String> roleName) {
+        super(userEmail != null ? userEmail : "", userPw != null ? userPw : "",
+                roleName.stream().map(str -> new SimpleGrantedAuthority("ROLE_" + str)).collect(Collectors.toList()));
 
-        super(userEmail, userPw, roleName.stream().map(str ->
-                new SimpleGrantedAuthority("ROLE_"+str)).collect(Collectors.toList()));
-
-        this.userEmail=userEmail;
-        this.userPw=userPw;
-        this.userNickname=userNickname;
-        this.slogin=slogin;
-        this.roleName=roleName;
+        this.userEmail = userEmail != null ? userEmail : "";
+        this.userPw = userPw != null ? userPw : "";
+        this.userNickname = userNickname != null ? userNickname : "";
+        this.slogin = slogin;
+        this.roleName = roleName != null ? roleName : List.of();
     }
 
-    public Map<String, Object> getClaims(){
-
-        Map<String, Object> map=new HashMap<>();
-        map.put("email",userEmail);
-        map.put("password",userPw);
-        map.put("nickname",userNickname);
-        map.put("slogin",slogin);
-        map.put("roleName",roleName);
+    public Map<String, Object> getClaims() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userEmail", userEmail);
+        map.put("userPw", userPw);
+        map.put("userNickname", userNickname);
+        map.put("slogin", slogin);
+        map.put("roleName", roleName);
         return map;
     }
 }
