@@ -14,10 +14,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class GameRoom {
     @Id
-    private String gameRoomID;
+    private String gameRoomId;
 
     private Date gameTime;
-    private int Turn;
+    private int turn;
     private String roomName;
     private String tier;
     private int players;

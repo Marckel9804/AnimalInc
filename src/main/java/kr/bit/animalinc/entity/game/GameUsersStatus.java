@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
+@IdClass(GameUsersStatusKey.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
