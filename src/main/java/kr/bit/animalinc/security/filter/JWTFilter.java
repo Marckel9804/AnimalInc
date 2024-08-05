@@ -45,7 +45,8 @@ public class JWTFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/api/user/send-verification-code") ||
                 requestURI.startsWith("/api/user/verify-email") ||
                 requestURI.startsWith("/api/user/check-nickname") ||
-                requestURI.startsWith("/api/user/google-userinfo");
+                requestURI.startsWith("/api/user/google-userinfo") ||
+                requestURI.startsWith("/api/user/check-profile");
     }
 
     //jwt토큰 검증 / 인증정보 설정 -> 필터 핵심
