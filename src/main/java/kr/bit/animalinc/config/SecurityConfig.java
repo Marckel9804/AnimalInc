@@ -1,6 +1,7 @@
 package kr.bit.animalinc.config;
 
 import kr.bit.animalinc.security.filter.JWTFilter;
+import kr.bit.animalinc.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,8 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JWTUtil jwtUtil;
+
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -42,6 +45,7 @@ public class SecurityConfig {
         //허용되는 Http메서드 설정
         corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","HEAD"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization","Cache-Control", "Content-Type"));
+        corsConfiguration.setExposedHeaders(Arrays.asList("Authorization")); // 추가
         corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -63,12 +67,6 @@ public class SecurityConfig {
 
         httpSecurity.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-/*        httpSecurity.formLogin(config ->{
-            config.loginPage("/api/user/login");
-            config.successHandler(new LoginSuccess());
-            config.failureHandler(new LoginFail());
-        });*/
-
         httpSecurity.authorizeHttpRequests(authorize -> {
             authorize
                     .requestMatchers("/api/user/**", "/api/auth/**", "/api/oauth2/**").permitAll()
@@ -76,7 +74,7 @@ public class SecurityConfig {
         });
 
         //jwt검증이 우선이고 그 다음 사용자 정보 기반으로 한 인증토큰 추가해라
-        httpSecurity.addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
