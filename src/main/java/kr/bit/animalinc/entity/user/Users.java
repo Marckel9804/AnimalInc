@@ -31,6 +31,8 @@ public class Users{
     private String userItem; //회원이 가지고 있는 아이템
     private boolean slogin;
 
+    private String platform;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memRoleList = new ArrayList<>();
