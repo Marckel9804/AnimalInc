@@ -22,5 +22,6 @@ public class GameRoom {
     private String tier;
     private int players;
     private int bots;
+    private int year;
 
 }

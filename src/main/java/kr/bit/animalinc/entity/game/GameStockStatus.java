@@ -7,13 +7,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.Date;
-
 @Entity
+@IdClass(GameStockStatusKey.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameStatusStock {
+public class GameStockStatus {
 
     @Id
     @ManyToOne
@@ -26,5 +25,6 @@ public class GameStatusStock {
 
     private float weight;
     private int price;
+    private int turn;
 
 }

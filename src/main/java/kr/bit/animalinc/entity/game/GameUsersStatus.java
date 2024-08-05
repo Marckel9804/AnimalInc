@@ -27,8 +27,6 @@ public class GameUsersStatus {
     private int timeMachine;
     private int shortSelling;
     private int worthInfo;
-    private int goodNews;
-    private int badNews;
     private int food1;
     private int food2;
     private int food3;
