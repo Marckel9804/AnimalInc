@@ -23,10 +23,7 @@ public class Comment {
     private Date creatDate;
 
     @ManyToOne
-    @JoinColumn(name = "bc_id", nullable = false)
+    @JoinColumn(name = "bcId", nullable = false)
     private BoardCommunity boardCommunity;
 
-    @ManyToOne
-    @JoinColumn(name = "user_num", nullable = false)
-    private Users cUser;
 }

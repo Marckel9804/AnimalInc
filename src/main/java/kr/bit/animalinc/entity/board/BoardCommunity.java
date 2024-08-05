@@ -1,15 +1,13 @@
 package kr.bit.animalinc.entity.board;
 
 import jakarta.persistence.*;
-import kr.bit.animalinc.entity.user.Users;
 import lombok.*;
 
-import java.util.Date;
 import java.util.List;
 
 @Entity
 @Data
-//@ToString(exclude = "author")
+@ToString(exclude = "comments")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,6 +16,8 @@ public class BoardCommunity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long bcId;
+
+    private String type;
 
     @Column(nullable = false, length = 20)
     private String bcCode;
@@ -29,11 +29,9 @@ public class BoardCommunity {
 
 //    private List<File> files;
 
-    private Date writeDate;
+    private String writeDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_num", nullable = false)
-    private Users bcUser;
+    private Long userNum;
 
     @OneToMany(mappedBy = "boardCommunity", cascade = CascadeType.ALL)
     private List<Comment> comments;

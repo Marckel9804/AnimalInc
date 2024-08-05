@@ -42,11 +42,6 @@ public class Users{
     //여기서 부터
     @OneToMany(mappedBy = "qUser" , cascade = CascadeType.ALL)
     private List<BoardFAQ> boardFAQS;
-    @OneToMany(mappedBy = "bcUser", cascade = CascadeType.ALL)
-    private List<BoardCommunity> boardCommunities;
-    @OneToMany(mappedBy = "cUser", cascade = CascadeType.ALL)
-    private List<Comment> comments;
-    // 여기까지 창호가 다른 테이블과 관계도 만든거
 
     //회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다. 관리자(ADMIN)는 0으로 저장
     public void addRole(MemberRole role) {memRoleList.add(role);}

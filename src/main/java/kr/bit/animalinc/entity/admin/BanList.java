@@ -17,7 +17,7 @@ public class BanList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long banId;
 
-    private Long usernum;
+    private Long userNum;
 
     private Date unlockDate;
     private String banReason;

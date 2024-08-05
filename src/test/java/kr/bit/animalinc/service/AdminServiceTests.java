@@ -34,7 +34,7 @@ public class AdminServiceTests {
         unlock.setDate(28);
 
         BanList input = BanList.builder()
-                .usernum(123L)
+                .userNum(123L)
                 .unlockDate(unlock)
                 .banReason("불법적인 행위")
                 .bannedDate(now)

@@ -30,7 +30,7 @@ public class BoardFAQ {
     // private List<File> files;
 
     @ManyToOne
-    @JoinColumn(name = "user_num", nullable = false)
+    @JoinColumn(name = "userNum", nullable = false)
     private Users qUser;
 
 

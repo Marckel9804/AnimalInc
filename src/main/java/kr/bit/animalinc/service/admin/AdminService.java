@@ -46,7 +46,7 @@ public class AdminService {
 
     @Transactional
     public BanList getBanList(Long user_num) {
-        BanList result = banListRepository.findByUsernum(user_num);
+        BanList result = banListRepository.findByUserNum(user_num);
         return result;
     }
 
@@ -58,7 +58,7 @@ public class AdminService {
 
     @Transactional
     public String deleteBanList(Long user_num) {
-        BanList target = banListRepository.findByUsernum(user_num);
+        BanList target = banListRepository.findByUserNum(user_num);
         banListRepository.delete(target);
         return "success";
     }
