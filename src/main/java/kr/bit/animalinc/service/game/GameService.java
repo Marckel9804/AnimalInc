@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -40,14 +41,15 @@ public class GameService {
 
     public void initStock(String roomId){
         GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
+        int year = Objects.requireNonNull(gameRoom).getYear();
         Random rand = new Random();
-        for(int i = 0; i< 20; i++){
-            int num1 = rand.nextInt(90001) + 10000; // 30000 ~ 100000
-            int num2 = rand.nextInt(200001) + 100000; // 100000 ~ 300000
-            int finalNum = rand.nextBoolean() ? num1 : num2;
-
+        for(int i = 1; i< 6; i++){
+            for(int j = 1; j< 13; j++){
+                int num1 = rand.nextInt(90001) + 10000; // 30000 ~ 100000
+                int num2 = rand.nextInt(200001) + 100000; // 100000 ~ 300000
+                int finalNum = rand.nextBoolean() ? num1 : num2;//10만 이하 이상 같은 확률로 뽑기
+            }
         }
-
     }
 
 }

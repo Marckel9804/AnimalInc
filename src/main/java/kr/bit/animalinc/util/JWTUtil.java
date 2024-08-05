@@ -36,7 +36,6 @@ public class JWTUtil {
         } catch (Exception e) {
             return false;
         }
-        return claim;
     }
 
     public Claims extractAllClaims(String token) {
