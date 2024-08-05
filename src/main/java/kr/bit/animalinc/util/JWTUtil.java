@@ -1,70 +1,54 @@
 package kr.bit.animalinc.util;
 
-import io.jsonwebtoken.InvalidClaimException;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.sql.Date;
-import java.time.ZonedDateTime;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Map;
 
 @Component
-@Slf4j
-public class JWTUtil {  //1.jwt 생성하고 2.검증
+public class JWTUtil {
 
-    private static String key="1234567890123456789012345678901234567890";  //jwt서명에 사용할 비밀 키
+    private static final String SECRET_KEY = "1234567890123456789012345678901234567890";
 
-    //클레임, 만료시간사용해 jwt토큰 생성
-    public static String generateToken(Map<String, Object> map, int min){
+    public static String generateToken(Map<String, Object> claims, int minutes) {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-        SecretKey key=null;
-
-        try{
-            key= Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
-            log.info("\n\nmap 내용" + map.toString());
-        }
-        catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
-
-        String str= Jwts.builder()
-                .setHeader(Map.of("typ","JWT"))
-                .setClaims(map)
-                .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))  //토큰발급된 시간설정
-                .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(min).toInstant())) //토큰의 유효시간 설정
-                .signWith(key)
-                .compact();  //jwt문자열 생성
-
-        return str;
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + minutes * 60 * 1000))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    //JWT검증
-    public static Map<String, Object> validateToken(String token){  //
-        Map<String,Object> claim=null;
-
-        try{
-            SecretKey key= Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
-
-            //토큰을 파싱해서 검증
-            claim=Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)  //토큰이 유효하지 않거나. 서명이 불일치하면 예외발생
-                    .getBody();
-        }catch (MalformedJwtException malformedJwtException) {
-            throw new JwtException("malformedJwtException");
-        }catch (InvalidClaimException invalidClaimException){
-            throw new JwtException("invalidClaimException");
-        }catch (JwtException jwtException){
-            throw new JwtException("jwtException");
+    public Boolean validateToken(String token) {
+        try {
+            SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
         } catch (Exception e) {
-            throw new JwtException("error");
+            return false;
         }
         return claim;
+    }
+
+    public Claims extractAllClaims(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    public String extractToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
