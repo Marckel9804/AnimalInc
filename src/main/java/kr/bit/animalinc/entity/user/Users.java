@@ -1,6 +1,9 @@
 package kr.bit.animalinc.entity.user;
 
 import jakarta.persistence.*;
+import kr.bit.animalinc.entity.board.BoardCommunity;
+import kr.bit.animalinc.entity.board.BoardFAQ;
+import kr.bit.animalinc.entity.board.Comment;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -27,6 +30,7 @@ public class Users{
     private int userPoint; //회원이 가지고 있는 포인트
     private int userRuby; //회원이 가지고 있는 루비(캐시)
     private String userGrade; //회원의 등급(티어)
+    @Column(columnDefinition = "integer default 0")
     private int userReportnum; //회원이 신고받은 횟수
     private String userItem; //회원이 가지고 있는 아이템
     private boolean slogin;
@@ -36,6 +40,11 @@ public class Users{
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memRoleList = new ArrayList<>();
+
+
+    //여기서 부터
+    @OneToMany(mappedBy = "qUser" , cascade = CascadeType.ALL)
+    private List<BoardFAQ> boardFAQS;
 
     //회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다. 관리자(ADMIN)는 0으로 저장
     public void addRole(MemberRole role) {memRoleList.add(role);}
