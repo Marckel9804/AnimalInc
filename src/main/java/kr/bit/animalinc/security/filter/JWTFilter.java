@@ -23,10 +23,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
 
-    //요청마다 한번씩 실행되는 필터
-    //특정조건을 만족하는 요청에 대해서 필터링하지 않도록 설정가능
-
-    //로그인 - 받아온 서버요청 - 서버쪽 토큰검증
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
@@ -49,10 +45,8 @@ public class JWTFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/api/user/check-profile");
     }
 
-    //jwt토큰 검증 / 인증정보 설정 -> 필터 핵심
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         String authHeader = request.getHeader("Authorization");
         String accessToken = null;
 
@@ -63,7 +57,6 @@ public class JWTFilter extends OncePerRequestFilter {
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
             setAuthenticationContext(accessToken);
         } else {
-            // Access Token이 유효하지 않은 경우, Refresh Token을 검사하여 Access Token 재발급
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
@@ -80,7 +73,6 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-
     }
 
     private void setAuthenticationContext(String token) {
@@ -90,11 +82,12 @@ public class JWTFilter extends OncePerRequestFilter {
         String nickname = (String) claims.get("userNickname");
         Boolean slogin = (Boolean) claims.get("slogin");
         List<String> roleName = (List<String>) claims.get("roleName");
+        String userGrade = (String) claims.get("userGrade");
+        Integer userPoint = (Integer) claims.get("userPoint");
 
-        UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName);
+        UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName, userGrade, userPoint);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usersDTO, null, usersDTO.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-
 }
