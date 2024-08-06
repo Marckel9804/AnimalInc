@@ -252,4 +252,10 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    // 새로운 API 엔드포인트 추가
+    @GetMapping("/api/userinfo/{userId}")
+    public Users getUserInfo(@PathVariable Long userId) {
+        return userService.getUserInfoById(userId);
+    }
 }
+
