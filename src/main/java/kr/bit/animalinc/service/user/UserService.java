@@ -136,10 +136,9 @@ public class UserService {
         } else {
             throw new IllegalStateException("User not found");
         }
-
-
     }
 
+    @Transactional
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
