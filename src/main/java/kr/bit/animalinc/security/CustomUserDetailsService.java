@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Users user = userRepository.getRole(username);  //회원정보+권한정보
 
-        if(user == null){
+        if (user == null) {
             throw new UsernameNotFoundException("User Not Found!");
         }
 
@@ -33,7 +33,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getUserPw(),
                 user.getUserNickname(),
                 user.isSlogin(),
-                user.getMemRoleList().stream().map(memberRole -> memberRole.name()).collect(Collectors.toList()));
+                user.getMemRoleList().stream().map(memberRole -> memberRole.name()).collect(Collectors.toList()),
+                user.getUserGrade(),
+                user.getUserPoint()
+        );
 
         log.info(String.valueOf(usersDTO));
         return usersDTO;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -136,4 +137,13 @@ public class UserService {
             throw new IllegalStateException("User not found");
         }
     }
+
+    public List<Users> findAll() {
+        return userRepository.findAll();
+    }
+
+    public Users findByEmail(String email) {
+        return userRepository.findByUserEmail(email).orElse(null);
+    }
+
 }
