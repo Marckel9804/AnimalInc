@@ -46,6 +46,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/api/user/verify-email") ||
                 requestURI.startsWith("/api/user/check-nickname") ||
                 requestURI.startsWith("/api/user/google-userinfo") ||
+                requestURI.startsWith("/api/user/send-password") ||
                 requestURI.startsWith("/api/user/check-profile");
     }
 

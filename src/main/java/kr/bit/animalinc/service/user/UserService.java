@@ -136,4 +136,32 @@ public class UserService {
             throw new IllegalStateException("User not found");
         }
     }
+
+    @Transactional
+    public Users findByEmail(String email) {
+        return userRepository.findByUserEmail(email).orElse(null);
+    }
+
+    @Transactional
+    public Users updateProfile(String email, String userRealname, String userNickname, String userBirthdate) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setUserRealname(userRealname);
+            user.setUserNickname(userNickname);
+            user.setUserBirthdate(LocalDate.parse(userBirthdate));
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    @Transactional
+    public boolean deleteUser(String email) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            userRepository.delete(optionalUser.get());
+            return true;
+        }
+        return false;
+    }
 }
