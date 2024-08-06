@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface GameUsersStatusRepository extends JpaRepository<GameUsersStatus, GameUsersStatusKey> {
     List<GameUsersStatus> findByGameRoom(GameRoom gameRoom);
+    GameUsersStatus findByUserNum(long userNum); // 이 줄 추가
+
 }
