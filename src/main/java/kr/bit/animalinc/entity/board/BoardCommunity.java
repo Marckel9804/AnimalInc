@@ -31,7 +31,7 @@ public class BoardCommunity {
 
     private String writeDate;
 
-    private Long userNum;
+    private String userEmail;
 
     @OneToMany(mappedBy = "boardCommunity", cascade = CascadeType.ALL)
     private List<Comment> comments;

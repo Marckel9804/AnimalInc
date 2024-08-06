@@ -69,11 +69,20 @@ public class BoardService {
         return result;
     }
 
-
-    public Page<BoardCommunity> getBoardCommunities(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("writeDate").descending());
-        return boardCommunityRepository.findAll(pageable);
+    @Transactional
+    public void deleteBoardCommunity(Long id) {
+        Optional<BoardCommunity> opBefore = boardCommunityRepository.findById(id);
+        if(opBefore.isPresent()) {
+            boardCommunityRepository.delete(opBefore.get());
+        }
     }
+
+
+    public Page<BoardCommunity> getBoardCommunities(String type,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("writeDate").descending());
+        return boardCommunityRepository.findByType(type,pageable);
+    }
+
 
 }
 

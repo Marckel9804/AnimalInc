@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BoardWriteDTO {
     private String type;
-    private Long userNum;
+    private String userEmail;
     private String bcCode;
     private String title;
     private String content;
@@ -23,7 +23,7 @@ public class BoardWriteDTO {
     public BoardCommunity toBoardCommunity() {
         BoardCommunity tmp = BoardCommunity.builder()
                 .type(type)
-                .userNum(userNum)
+                .userEmail(userEmail)
                 .bcCode(bcCode)
                 .title(title)
                 .content(content)

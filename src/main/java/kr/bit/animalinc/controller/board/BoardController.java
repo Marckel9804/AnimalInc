@@ -29,9 +29,10 @@ public class BoardController {
 
     @GetMapping("")
     public Page<BoardCommunity> getBoardCommunities(
+            @RequestParam(defaultValue = "notice") String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return boardService.getBoardCommunities(page, size);
+        return boardService.getBoardCommunities(type, page, size);
     }
 
     @GetMapping("/{id}")
@@ -52,15 +53,28 @@ public class BoardController {
     }
 
     @PutMapping("")
-    public ResponseEntity<?> updateBoardCommunity(@RequestBody BoardCommunity updateBoard,
-                                                  Principal principal
-    ) {
-
-
+    public ResponseEntity<?> updateBoardCommunity(@RequestBody BoardCommunity updateBoard) {
 
         log.info("\nupdateBoardCommunity >> " + updateBoard.toString());
         BoardCommunity result = boardService.updateBoardCommunity(updateBoard);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/email")
+    public ResponseEntity<?> sendEmail(
+            Principal principal
+    ) {
+        String email = principal.getName();
+
+        return ResponseEntity.ok(Map.of("email", email));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBoardCommunity(@PathVariable Long id) {
+
+        boardService.deleteBoardCommunity(id);
+
+        return ResponseEntity.ok(Map.of("data", "deleted"));
     }
 }
