@@ -105,7 +105,7 @@ public class UserController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
         String accessToken = jwtUtil.generateToken(claims, 30);
@@ -136,7 +136,7 @@ public class UserController {
                     .map(Enum::name)
                     .collect(Collectors.toList());
 
-            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -334,9 +334,7 @@ public class UserController {
                         user.getUserPw(),
                         user.getUserNickname(),
                         user.isSlogin(),
-                        user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
-                        user.getUserGrade(),
-                        user.getUserPoint()
+                        user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(usersDTOList);
