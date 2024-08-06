@@ -42,7 +42,6 @@ public class GameService {
     }
 
     public GameUsersStatus getUserStatus(long userNum, String roomId) {
-
         List<GameUsersStatus> gameUsersStatuses =  getUserStatus(roomId);
         for(GameUsersStatus gameUsersStatus : gameUsersStatuses){
             if(gameUsersStatus.getUserNum() == userNum){
@@ -59,11 +58,11 @@ public class GameService {
 
     public void addStock(String roomId, int turn){
         GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
+        int year = Objects.requireNonNull(gameRoom).getYear();
         if(turn == 1){
             initStock(gameRoom);
             return;
         }else if(turn < 12 && turn > 1){
-            int year = Objects.requireNonNull(gameRoom).getYear();
             List<StockHistory> stocks = stockHistoryRepository.findAllByYearAndMonthOrderByStock(year,turn);
             List<GameStockStatus> gameStockStatuses = gameStockStatusRepository.findByGameRoomAndTurnOrderByStockId(gameRoom, turn-1);
             List<GameStockStatus> gameStockStatuses2 = new ArrayList<>();
@@ -78,10 +77,21 @@ public class GameService {
                 gameStockStatuses2.add(gameStockStatus);
             }
             gameStockStatusRepository.saveAll(gameStockStatuses2);
+        }else if(turn==12){
+            List<GameStockStatus> gameStockStatuses = gameStockStatusRepository.findByGameRoomAndTurnOrderByStockId(gameRoom, turn-1);
+            List<GameStockStatus> gameStockStatuses2 = new ArrayList<>();
+            for (GameStockStatus stockStatus : gameStockStatuses) {
+                GameStockStatus gameStockStatus = new GameStockStatus();
+                gameStockStatus.setGameRoom(gameRoom);
+                gameStockStatus.setId(gameRoom.getGameRoomId() + "-" + stockStatus.getStockId() + "-" + year + "-" + turn);
+                gameStockStatus.setStockId(stockStatus.getStockId());
+                gameStockStatus.setPrice((int) (stockStatus.getPrice() * (100 + stockStatus.getWeight()) / 100));
+                gameStockStatus.setTurn(turn);
+                gameStockStatus.setWeight(0);
+                gameStockStatuses2.add(gameStockStatus);
+            }
+            gameStockStatusRepository.saveAll(gameStockStatuses2);
         }
-        List<GameStockStatus> gameStockStatuses = new ArrayList<>();
-        int year = Objects.requireNonNull(gameRoom).getYear();
-
     }
 
     public void initStock(GameRoom gameRoom){
