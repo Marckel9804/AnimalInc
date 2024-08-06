@@ -6,6 +6,7 @@ import lombok.Data;
 public class GameRoomDTO {
 
     private Long userNum;
+    private String userGrade;
     private String gameRoomId;
 
 }
