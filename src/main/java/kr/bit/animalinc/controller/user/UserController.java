@@ -105,7 +105,7 @@ public class UserController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles, user.getUserGrade(), user.getUserPoint());
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
         String accessToken = jwtUtil.generateToken(claims, 30);
@@ -136,7 +136,7 @@ public class UserController {
                     .map(Enum::name)
                     .collect(Collectors.toList());
 
-            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles, user.getUserGrade(), user.getUserPoint());
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -253,29 +253,38 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // 새로운 API 엔드포인트 추가
+    @GetMapping("/players")
+    public ResponseEntity<List<Users>> getPlayers() {
+        List<Users> users = userService.getAllUsers(); // 모든 사용자 정보 가져오기 (적절한 서비스 메소드 호출)
+        return ResponseEntity.ok(users);
+    }
 
 
-//    @GetMapping("/get-profile")
-//    public ResponseEntity<?> getProfile(HttpServletRequest request) {
-//        String token = jwtUtil.extractToken(request);
-//        if (token == null || !jwtUtil.validateToken(token)) {
-//            return ResponseEntity.status(401).body("Invalid or missing token");
-//        }
-//
-//        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
-//        Users user = userService.findByEmail(email);
-//        if (user == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-//        }
-//
-//        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
-//        userDTO.setUserPw(user.getUserPw());
-//        userDTO.setUserBirthdate(user.getUserBirthdate());
-//        userDTO.setUserPoint(user.getUserPoint());
-//
-//        return ResponseEntity.ok(userDTO);
-//    }
+    @GetMapping("/get-profile")
+    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        Users user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        UsersDTO usersDTO = new UsersDTO(
+                user.getUserEmail(),
+                user.getUserPw(),
+                user.getUserNickname(),
+                user.isSlogin(),
+                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
+
+        );
+
+        return ResponseEntity.ok(usersDTO);
+    }
 
 //    @GetMapping("/players")
 //    public ResponseEntity<List<UsersDTO>> getAllPlayers() {
@@ -317,6 +326,28 @@ public class UserController {
 //        );
 //
 //        return ResponseEntity.ok(usersDTO);
+//    }
+
+
+//    @GetMapping("/get-profile")
+//    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+//        String token = jwtUtil.extractToken(request);
+//        if (token == null || !jwtUtil.validateToken(token)) {
+//            return ResponseEntity.status(401).body("Invalid or missing token");
+//        }
+//
+//        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+//        Users user = userService.findByEmail(email);
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+//        }
+//
+//        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+//        userDTO.setUserPw(user.getUserPw());
+//        userDTO.setUserBirthdate(user.getUserBirthdate());
+//        userDTO.setUserPoint(user.getUserPoint());
+//
+//        return ResponseEntity.ok(userDTO);
 //    }
 
 }

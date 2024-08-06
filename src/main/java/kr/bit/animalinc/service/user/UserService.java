@@ -140,6 +140,10 @@ public class UserService {
 
     }
 
+    public List<Users> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     // 새로운 메서드 추가
     @Transactional
     public Users findByEmail(String email) {

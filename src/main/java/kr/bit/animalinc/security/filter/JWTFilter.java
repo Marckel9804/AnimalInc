@@ -85,7 +85,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String userGrade = (String) claims.get("userGrade");
         Integer userPoint = (Integer) claims.get("userPoint");
 
-        UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName, userGrade, userPoint);
+        UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usersDTO, null, usersDTO.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
