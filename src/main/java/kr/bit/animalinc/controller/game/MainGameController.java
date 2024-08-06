@@ -50,4 +50,11 @@ public class MainGameController {
     public void gameOver(@PathVariable String roomId) {
 
     }
+
+    @GetMapping("/test/{roomId}/{turn}")
+    public void test(@PathVariable String roomId, @PathVariable String turn){
+        gameService.addStock(roomId,Integer.parseInt(turn));
+
+
+    }
 }

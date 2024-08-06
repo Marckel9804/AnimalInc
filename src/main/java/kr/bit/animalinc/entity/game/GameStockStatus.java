@@ -8,19 +8,19 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@IdClass(GameStockStatusKey.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameStockStatus {
 
     @Id
+    String id;
+
     @ManyToOne
     @JoinColumn(name = "gameRoomId")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GameRoom gameRoom;
 
-    @Id
     private String stockId;
 
     private float weight;
