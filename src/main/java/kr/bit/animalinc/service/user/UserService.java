@@ -138,7 +138,7 @@ public class UserService {
         }
     }
 
-    public List<Users> findAll() {
+    public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
 

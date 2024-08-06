@@ -33,9 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getUserPw(),
                 user.getUserNickname(),
                 user.isSlogin(),
-                user.getMemRoleList().stream().map(memberRole -> memberRole.name()).collect(Collectors.toList()),
-                user.getUserGrade(),
-                user.getUserPoint()
+                user.getMemRoleList().stream().map(memberRole -> memberRole.name()).collect(Collectors.toList())
         );
 
         log.info(String.valueOf(usersDTO));
