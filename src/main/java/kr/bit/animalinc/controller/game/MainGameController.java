@@ -3,15 +3,13 @@ package kr.bit.animalinc.controller.game;
 import kr.bit.animalinc.entity.game.GameRoom;
 import kr.bit.animalinc.entity.game.GameStockStatus;
 import kr.bit.animalinc.entity.game.GameUsersStatus;
-import kr.bit.animalinc.repository.game.GameRoomRepository;
-import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import kr.bit.animalinc.service.game.GameService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +19,6 @@ import java.util.Optional;
 @Slf4j
 @CrossOrigin("*")
 public class MainGameController {
-
 
     @Autowired
     private GameService gameService;
@@ -33,7 +30,7 @@ public class MainGameController {
 
     @GetMapping("/gameStart/{roomId}")
     public void gameStart(@PathVariable String roomId) {
-
+        // 게임 시작 로직 추가
     }
 
     @GetMapping("/userStatus/{roomId}")
@@ -48,13 +45,22 @@ public class MainGameController {
 
     @GetMapping("/gameOver/{roomId}")
     public void gameOver(@PathVariable String roomId) {
-
+        // 게임 종료 로직 추가
     }
 
     @GetMapping("/test/{roomId}/{turn}")
-    public void test(@PathVariable String roomId, @PathVariable String turn){
-        gameService.addStock(roomId,Integer.parseInt(turn));
+    public void test(@PathVariable String roomId, @PathVariable String turn) {
+        gameService.addStock(roomId, Integer.parseInt(turn));
+    }
 
-
+    // 추가된 엔드포인트
+    @GetMapping("/status/{userNum}")
+    public ResponseEntity<GameUsersStatus> getGameUserStatus(@PathVariable long userNum) {
+        GameUsersStatus status = gameService.getGameUserStatus(userNum);
+        if (status != null) {
+            return ResponseEntity.ok(status);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
