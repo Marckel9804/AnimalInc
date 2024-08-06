@@ -359,7 +359,7 @@ public class UserController {
                 user.getUserPw(),
                 user.getUserNickname(),
                 user.isSlogin(),
-                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
+                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
 
         return ResponseEntity.ok(usersDTO);
