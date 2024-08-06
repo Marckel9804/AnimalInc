@@ -32,8 +32,8 @@ public class BoardServiceTests {
                     .bcCode("info")
                     .title("제목" + i)
                     .content("내용" + i)
-                    .userNum(3L)
-                    .writeDate(date)
+                    .userEmail("btt421")
+                    .writeDate(String.valueOf(date))
                     .comments(comments)
                     .build();
 
