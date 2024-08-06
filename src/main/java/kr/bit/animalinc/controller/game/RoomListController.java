@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/user/game")
@@ -14,12 +16,18 @@ public class RoomListController {
 
     @Autowired
     private RoomListService roomListService;
+
     // 공지사항 가져오기
 
     // 방 리스트 가져오기
+    @GetMapping("/selectAllRoom")
+    public List<GameRoomDTO> selectAllRoom() {
+        List<GameRoomDTO> gameRooms = roomListService.selectAllRoom();
+        return gameRooms;
+    }
 
     // 방 만들기
-    @PostMapping("/insertroom")
+    @PostMapping("/insertRoom")
     public void insertRoom(@RequestBody GameRoomDTO gameRoomDTO) {
         log.info("gameRoomDTO : {}", gameRoomDTO.toString());
         roomListService.insertRoom(gameRoomDTO);
