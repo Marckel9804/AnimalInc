@@ -140,8 +140,9 @@ public class UserService {
     }
 
 // 새로운 메서드 추가
-public Users getUserInfoById(Long userId) {
-    return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+@Transactional
+public Users findByEmail(String email) {
+    return userRepository.findByUserEmail(email).orElse(null);
 }
 }
 

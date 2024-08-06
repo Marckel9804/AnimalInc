@@ -248,14 +248,33 @@ public class UserController {
             return ResponseEntity.status(400).body("Nickname already in use");
         }
 
+
         Users user = userService.completeProfile(email, birthdate, nickname);
         return ResponseEntity.ok(user);
     }
 
     // 새로운 API 엔드포인트 추가
-    @GetMapping("/api/userinfo/{userId}")
-    public Users getUserInfo(@PathVariable Long userId) {
-        return userService.getUserInfoById(userId);
+
+
+    @GetMapping("/get-profile")
+    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        Users user = userService.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        userDTO.setUserPw(user.getUserPw());
+        userDTO.setUserBirthdate(user.getUserBirthdate());
+        userDTO.setUserPoint(user.getUserPoint());
+
+        return ResponseEntity.ok(userDTO);
     }
 }
 
