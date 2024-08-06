@@ -248,6 +248,7 @@ public class UserController {
             return ResponseEntity.status(400).body("Nickname already in use");
         }
 
+
         Users user = userService.completeProfile(email, birthdate, nickname);
         return ResponseEntity.ok(user);
     }
@@ -258,14 +259,15 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UsersDTO> getCurrentUser(HttpServletRequest request) {
+
+    @GetMapping("/get-profile")
+    public ResponseEntity<?> getProfile(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request);
         if (token == null || !jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(401).body("Invalid or missing token");
         }
 
-        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
         Users user = userService.findByEmail(email);
 
         if (user == null) {
@@ -284,25 +286,69 @@ public class UserController {
         return ResponseEntity.ok(usersDTO);
     }
 
-    @GetMapping("/get-profile")
-    public ResponseEntity<?> getProfile(HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request);
-        if (token == null || !jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(401).body("Invalid or missing token");
-        }
+//    @GetMapping("/players")
+//    public ResponseEntity<List<UsersDTO>> getAllPlayers() {
+//        List<Users> usersList = userService.findAll();
+//        List<UsersDTO> usersDTOList = usersList.stream()
+//                .map(user -> new UsersDTO(
+//                        user.getUserEmail(),
+//                        user.getUserPw(),
+//                        user.getUserNickname(),
+//                        user.isSlogin(),
+//                        user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
+//                        user.getUserGrade(),
+//                        user.getUserPoint()
+//                ))
+//                .collect(Collectors.toList());
+//        return ResponseEntity.ok(usersDTOList);
+//    }
+//
+//    @GetMapping("/me")
+//    public ResponseEntity<UsersDTO> getCurrentUser(HttpServletRequest request) {
+//        String token = jwtUtil.extractToken(request);
+//        if (token == null || !jwtUtil.validateToken(token)) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        }
+//
+//        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+//        Users user = userService.findByEmail(email);
+//
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//
+//        UsersDTO usersDTO = new UsersDTO(
+//                user.getUserEmail(),
+//                user.getUserPw(),
+//                user.getUserNickname(),
+//                user.isSlogin(),
+//                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
+//        );
+//
+//        return ResponseEntity.ok(usersDTO);
+//    }
 
-        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
-        Users user = userService.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
 
-        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
-        userDTO.setUserPw(user.getUserPw());
-        userDTO.setUserBirthdate(user.getUserBirthdate());
-        userDTO.setUserPoint(user.getUserPoint());
-
-        return ResponseEntity.ok(userDTO);
-    }
+//    @GetMapping("/get-profile")
+//    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+//        String token = jwtUtil.extractToken(request);
+//        if (token == null || !jwtUtil.validateToken(token)) {
+//            return ResponseEntity.status(401).body("Invalid or missing token");
+//        }
+//
+//        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+//        Users user = userService.findByEmail(email);
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+//        }
+//
+//        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+//        userDTO.setUserPw(user.getUserPw());
+//        userDTO.setUserBirthdate(user.getUserBirthdate());
+//        userDTO.setUserPoint(user.getUserPoint());
+//
+//        return ResponseEntity.ok(userDTO);
+//    }
 
 }
+

@@ -67,7 +67,7 @@ public class UserService {
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
             if (!user.getPlatform().equals(platform)) {
-                throw new IllegalStateException("이미 해당 이메일로 "+ getRegisteredMethod(email) +"에서 가입하셨습니다.");
+                throw new IllegalStateException("이미 해당 이메일로 " + getRegisteredMethod(email) + "에서 가입하셨습니다.");
             }
             log.info("User already exists with email: {}", email);
         } else {
@@ -76,7 +76,7 @@ public class UserService {
                 if (optionalUser.isPresent()) {
                     user = optionalUser.get();
                     if (!user.getPlatform().equals(platform)) {
-                        throw new IllegalStateException("이미 해당 이메일로 "+ getRegisteredMethod(email) +"에서 가입하셨습니다.");
+                        throw new IllegalStateException("이미 해당 이메일로 " + getRegisteredMethod(email) + "에서 가입하셨습니다.");
                     }
                     log.info("User already exists with email: {}", email);
                 } else {
@@ -111,7 +111,7 @@ public class UserService {
             if (user.isSlogin()) {
                 String userPlatform = user.getPlatform();
                 if (userPlatform.equals("Naver"))
-                    return"네이버";
+                    return "네이버";
                 else if (userPlatform.equals("Kakao"))
                     return "카카오";
                 else if (userPlatform.equals("Google"))
@@ -136,14 +136,20 @@ public class UserService {
         } else {
             throw new IllegalStateException("User not found");
         }
+
+
     }
 
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // 새로운 메서드 추가
+    @Transactional
     public Users findByEmail(String email) {
         return userRepository.findByUserEmail(email).orElse(null);
-    }
 
+    }
 }
+
+
