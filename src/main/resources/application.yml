@@ -5,6 +5,11 @@ spring:
     username: animalinc
     password: 1234
 
+  servlet:
+    multipart:
+      max-request-size: 40MB
+      max-file-size: 10MB
+
   jpa:
 
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -13,9 +18,25 @@ spring:
         format_sql: true
 
     hibernate:
-      ddl-auto: create
-      #      ddl-auto: update
+#     ddl-auto: create
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jason.naver.com@gmail.com
+    password: axjizmhfvidiutdy
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true
+        starttls.required: true
+
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    type: redis
