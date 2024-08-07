@@ -60,7 +60,7 @@ public class UserController {
 
         String registeredMethod = userService.getRegisteredMethod(email);
         if (!"알 수 없음".equals(registeredMethod)) {
-            return ResponseEntity.status(400).body("이미 해당 이메일로" + registeredMethod + "에서 가입된 이메일입니다.");
+            return ResponseEntity.status(400).body("해당 이메일은 이미 " + registeredMethod + "에서 가입된 이메일입니다.");
         }
 
         log.info("Request to send verification code to {}", email);
@@ -92,20 +92,20 @@ public class UserController {
         String userPw = request.get("userPw");
 
         if (userEmail == null || userPw == null) {
-            return ResponseEntity.status(400).body("Email or Password is missing");
+            return ResponseEntity.status(400).body("이메일과 비밀번호를 입력해주세요");
         }
 
         Users user = userService.login(userEmail, userPw);
 
         if (user == null) {
-            return ResponseEntity.status(401).body("Invalid Email or Password");
+            return ResponseEntity.status(401).body("이메일이나 비밀번호를 확인해주세요");
         }
 
         List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
         String accessToken = jwtUtil.generateToken(claims, 30);
@@ -136,7 +136,7 @@ public class UserController {
                     .map(Enum::name)
                     .collect(Collectors.toList());
 
-            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserPw(), user.getUserNickname(), user.isSlogin(), roles);
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -220,11 +220,13 @@ public class UserController {
                     if (jwtUtil.validateToken(refreshToken)) {
                         Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
                         String newAccessToken = jwtUtil.generateToken(claims, 30);
+                        log.info("Access token refreshed successfully for email: {}", claims.get("userEmail"));
                         return ResponseEntity.ok().header("Authorization", "Bearer " + newAccessToken).build();
                     }
                 }
             }
         }
+        log.warn("Invalid refresh token");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
     }
 
@@ -240,7 +242,7 @@ public class UserController {
         String nickname = request.get("nickname");
 
         if (email == null || birthdate == null || nickname == null) {
-            return ResponseEntity.status(400).body("Invalid data provided");
+            return ResponseEntity.status(400).body("모든 정보를 입력해주세요");
         }
 
         boolean nicknameAvailable = userService.checkNickname(nickname);
@@ -253,13 +255,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/players")
-    public ResponseEntity<List<Users>> getPlayers() {
-        List<Users> users = userService.getAllUsers(); // 모든 사용자 정보 가져오기 (적절한 서비스 메소드 호출)
-        return ResponseEntity.ok(users);
-    }
-
-
     @GetMapping("/get-profile")
     public ResponseEntity<?> getProfile(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request);
@@ -268,6 +263,83 @@ public class UserController {
         }
 
         String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        Users user = userService.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        userDTO.setUserPw(user.getUserPw());
+        userDTO.setUserBirthdate(user.getUserBirthdate());
+        userDTO.setUserPoint(user.getUserPoint());
+
+        return ResponseEntity.ok(userDTO);
+    }
+
+    @PostMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        String userRealname = request.get("userRealname");
+        String userNickname = request.get("userNickname");
+        String userBirthdate = request.get("userBirthdate");
+
+        Users updatedUser = userService.updateProfile(email, userRealname, userNickname, userBirthdate);
+        if (updatedUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteProfile(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        boolean deleted = userService.deleteUser(email);
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PostMapping("/send-password")
+    public ResponseEntity<?> sendPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        try {
+            emailService.sendEmailForCertification(email);
+            log.info("임시 비밀번호가 이메일로 전송되었습니다: {}", email);
+            return ResponseEntity.ok("임시 비밀번호가 이메일로 전송되었습니다.");
+        } catch (Exception e) {
+            log.error("임시 비밀번호 전송 중 오류 발생: ", e);
+            return ResponseEntity.status(500).body("임시 비밀번호 전송 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/players")
+    public ResponseEntity<List<Users>> getPlayers() {
+        List<Users> users = userService.getAllUsers(); // 모든 사용자 정보 가져오기 (적절한 서비스 메소드 호출)
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsersDTO> getCurrentUser(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
         Users user = userService.findByEmail(email);
 
         if (user == null) {
@@ -280,9 +352,9 @@ public class UserController {
                 user.getUserNickname(),
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
-
         );
-
+        usersDTO.setUserRuby(user.getUserRuby()); //헤더
+        usersDTO.setUserPoint(user.getUserPoint()); //헤더
         return ResponseEntity.ok(usersDTO);
     }
 
@@ -351,4 +423,7 @@ public class UserController {
 //    }
 
 }
+
+
+
 
