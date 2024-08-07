@@ -357,8 +357,30 @@ public class UserController {
         usersDTO.setUserPoint(user.getUserPoint()); //헤더
         return ResponseEntity.ok(usersDTO);
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        String currentPassword = request.get("currentPassword");
+        String newPassword = request.get("newPassword");
+
+        boolean isPasswordChanged = userService.changePassword(email, currentPassword, newPassword);
+
+        if (!isPasswordChanged) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Current password is incorrect");
+        }
+
+        return ResponseEntity.ok("비밀번호가 변경되었습니다!");
+    }
+
+    @GetMapping("/rankings")
+    public ResponseEntity<List<UsersDTO>> getRankings() {
+        List<UsersDTO> rankings = userService.getRankings();
+        return ResponseEntity.ok(rankings);
+    }
 }
-
-
-
-
