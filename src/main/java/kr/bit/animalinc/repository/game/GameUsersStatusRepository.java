@@ -1,5 +1,6 @@
 package kr.bit.animalinc.repository.game;
 
+import kr.bit.animalinc.dto.game.GameUsersStatusDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
 import kr.bit.animalinc.entity.game.GameUsersStatus;
 import kr.bit.animalinc.entity.game.GameUsersStatusKey;

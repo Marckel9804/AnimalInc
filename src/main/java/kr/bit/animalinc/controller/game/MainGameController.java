@@ -1,5 +1,6 @@
 package kr.bit.animalinc.controller.game;
 
+import kr.bit.animalinc.dto.game.GameUsersStatusDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
 import kr.bit.animalinc.entity.game.GameStockStatus;
 import kr.bit.animalinc.entity.game.GameUsersStatus;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +36,8 @@ public class MainGameController {
     }
 
     @GetMapping("/userStatus/{roomId}")
-    public List<GameUsersStatus> getUserStatus(@PathVariable String roomId) {
-        return gameService.getUserStatus(roomId);
+    public List<GameUsersStatusDTO> getUserStatus(@PathVariable String roomId, Principal principal) {
+        return gameService.getUserStatus(roomId, principal.getName());
     }
 
     @GetMapping("/stockStatus/{roomId}")
@@ -49,7 +51,8 @@ public class MainGameController {
     }
 
     @GetMapping("/test/{roomId}/{turn}")
-    public void test(@PathVariable String roomId, @PathVariable String turn) {
-        gameService.addStock(roomId, Integer.parseInt(turn));
+    public void nextTurn(@PathVariable String roomId, @PathVariable String turn) {
+        gameService.increaTurn(roomId);
+        gameService.addStock(roomId, Integer.parseInt(turn)+1);
     }
 }
