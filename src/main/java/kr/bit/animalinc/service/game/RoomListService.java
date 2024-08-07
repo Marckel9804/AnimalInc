@@ -27,7 +27,9 @@ public class RoomListService {
         List<GameRoom> allRooms = gameRoomRepository.findAll();
         // Entity 를 DTO 로 변환
         List<GameRoomDTO> allDTORooms = new ArrayList<>();
-        allDTORooms.add(new GameRoomDTO().toGameRoomDto(allRooms.iterator().next()));
+        for (GameRoom room : allRooms) {
+            allDTORooms.add(new GameRoomDTO().toGameRoomDto(room));
+        }
         return allDTORooms;
     }
 
