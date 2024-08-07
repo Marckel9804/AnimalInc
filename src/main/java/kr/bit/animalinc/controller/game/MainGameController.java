@@ -55,15 +55,4 @@ public class MainGameController {
         gameService.increaTurn(roomId);
         gameService.addStock(roomId, Integer.parseInt(turn)+1);
     }
-
-    // 추가된 엔드포인트
-    @GetMapping("/status/{userNum}")
-    public ResponseEntity<GameUsersStatus> getGameUserStatus(@PathVariable long userNum) {
-        GameUsersStatus status = gameService.getGameUserStatus(userNum);
-        if (status != null) {
-            return ResponseEntity.ok(status);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }

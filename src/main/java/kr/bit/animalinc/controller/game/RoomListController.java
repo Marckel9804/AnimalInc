@@ -33,4 +33,8 @@ public class RoomListController {
         roomListService.insertRoom(gameRoomDTO);
     }
 
+    @GetMapping("/room/{roomId}")
+    public GameRoomDTO getRoomById(@PathVariable String roomId) {
+        return roomListService.getRoomById(roomId);
+    }
 }

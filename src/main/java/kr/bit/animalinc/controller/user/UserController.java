@@ -272,6 +272,7 @@ public class UserController {
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
+        userDTO.setUserGrade(user.getUserGrade());
 
         return ResponseEntity.ok(userDTO);
     }
@@ -353,10 +354,11 @@ public class UserController {
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
-        usersDTO.setUserRuby(user.getUserRuby()); //헤더
-        usersDTO.setUserPoint(user.getUserPoint()); //헤더
+        usersDTO.setUserPoint(user.getUserPoint()); // 추가: 사용자 포인트 설정
+        usersDTO.setUserGrade(user.getUserGrade()); // 추가: 사용자 등급 설정
         return ResponseEntity.ok(usersDTO);
     }
+
 
 //    @GetMapping("/players")
 //    public ResponseEntity<List<UsersDTO>> getAllPlayers() {

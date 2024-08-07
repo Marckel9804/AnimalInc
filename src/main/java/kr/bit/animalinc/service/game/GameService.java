@@ -123,9 +123,9 @@ public class GameService {
         gameStockStatusRepository.saveAll(gameStockStatuses);
     }
 
-    // 추가된 메서드
-    public GameUsersStatus getGameUserStatus(long userNum) {
-        return gameUsersStatusRepository.findByUserNum(userNum);
+    public void addPlayerToGame(GameUsersStatus gameUsersStatus) {
+        gameUsersStatus.setCash(50000000); // 초기 캐시 설정
+        gameUsersStatusRepository.save(gameUsersStatus);
     }
 
     public void increaTurn(String roomId){
