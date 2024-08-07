@@ -35,22 +35,21 @@ public class UsersDTO extends User {
 
     private List<String> roleName; //회원 역할(관리자와 회원 권한을 구분하기 위해서)
 
-    public UsersDTO(String userEmail, String userPw, String userNickname, boolean slogin, List<String> roleName) {
-        super(userEmail != null ? userEmail : "", userPw != null ? userPw : "",
+    public UsersDTO(String userEmail, String userRealname, String userNickname, boolean slogin, List<String> roleName) {
+        super(userEmail != null ? userEmail : "", userRealname != null ? userRealname : "",
                 roleName.stream().map(str -> new SimpleGrantedAuthority("ROLE_" + str)).collect(Collectors.toList()));
 
         this.userEmail = userEmail != null ? userEmail : "";
-        this.userPw = userPw != null ? userPw : "";
+        this.userRealname = userRealname != null ? userRealname : "";
         this.userNickname = userNickname != null ? userNickname : "";
         this.slogin = slogin;
         this.roleName = roleName != null ? roleName : List.of();
-
     }
 
     public Map<String, Object> getClaims() {
         Map<String, Object> map = new HashMap<>();
         map.put("userEmail", userEmail);
-        map.put("userPw", userPw);
+        map.put("userRealname", userRealname);
         map.put("userNickname", userNickname);
         map.put("slogin", slogin);
         map.put("roleName", roleName);
