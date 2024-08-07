@@ -282,7 +282,8 @@ public class UserController {
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
 
         );
-
+        usersDTO.setUserRuby(user.getUserRuby()); //헤더
+        usersDTO.setUserPoint(user.getUserPoint()); //헤더
         return ResponseEntity.ok(usersDTO);
     }
 
@@ -351,4 +352,7 @@ public class UserController {
 //    }
 
 }
+
+
+
 
