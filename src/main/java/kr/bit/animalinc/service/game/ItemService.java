@@ -31,6 +31,10 @@ public class ItemService {
 
     }
 
+    public void fakeNews(String roomId, Long userNum){
+        
+    }
+
 
 
 
