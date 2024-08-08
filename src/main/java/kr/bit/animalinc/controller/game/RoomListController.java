@@ -1,6 +1,7 @@
 package kr.bit.animalinc.controller.game;
 
 import kr.bit.animalinc.dto.game.GameRoomDTO;
+import kr.bit.animalinc.service.game.GameService;
 import kr.bit.animalinc.service.game.RoomListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,13 @@ public class RoomListController {
     public void insertRoom(@RequestBody GameRoomDTO gameRoomDTO) {
         log.info("gameRoomDTO : {}", gameRoomDTO.toString());
         roomListService.insertRoom(gameRoomDTO);
+    }
+
+    // 방에 입장하면 플레이어 수 증가시키기
+    @PostMapping("/updateCount/{roomId}")
+    public void updatePlayerCount(@PathVariable String roomId) {
+        log.info("방 번호 받아오기 : {}", roomId);
+        roomListService.updatePlayerCount(roomId);
     }
 
 }
