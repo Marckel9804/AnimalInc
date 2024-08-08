@@ -273,7 +273,9 @@ public class UserController {
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
         userDTO.setUserGrade(user.getUserGrade());
-
+        userDTO.setUserRuby(user.getUserRuby());
+        userDTO.setUserItem(user.getUserItem());
+        userDTO.setUserPicture(user.getUserPicture());
         return ResponseEntity.ok(userDTO);
     }
 
@@ -383,5 +385,26 @@ public class UserController {
     public ResponseEntity<List<UsersDTO>> getRankings() {
         List<UsersDTO> rankings = userService.getRankings();
         return ResponseEntity.ok(rankings);
+    }
+
+    @PostMapping("/update-profile-picture")
+    public ResponseEntity<?> updateProfilePicture(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        String userPicture = request.get("userPicture");
+
+        boolean isUpdated = userService.updateUserProfilePicture(email, userPicture);
+
+        if (isUpdated) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Profile picture updated successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update profile picture");
+        }
     }
 }

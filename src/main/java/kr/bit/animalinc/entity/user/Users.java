@@ -1,9 +1,7 @@
 package kr.bit.animalinc.entity.user;
 
 import jakarta.persistence.*;
-import kr.bit.animalinc.entity.board.BoardCommunity;
 import kr.bit.animalinc.entity.board.BoardFAQ;
-import kr.bit.animalinc.entity.board.Comment;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -36,6 +34,8 @@ public class Users{
     private boolean slogin;
 
     private String platform;
+
+    private String userPicture; //프로필 사진 URL
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default

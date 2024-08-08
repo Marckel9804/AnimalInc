@@ -219,4 +219,16 @@ public class UserService {
         List<String> gradeOrder = List.of("Bronze", "Silver", "Gold");
         return Integer.compare(gradeOrder.indexOf(grade1), gradeOrder.indexOf(grade2));
     }
+
+    public boolean updateUserProfilePicture(String email, String userPicture) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setUserPicture(userPicture);
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
