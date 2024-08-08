@@ -42,6 +42,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/api/user/verify-email") ||
                 requestURI.startsWith("/api/user/check-nickname") ||
                 requestURI.startsWith("/api/user/google-userinfo") ||
+                requestURI.startsWith("/api/user/send-password") ||
                 requestURI.startsWith("/api/user/check-profile");
     }
 
@@ -82,8 +83,6 @@ public class JWTFilter extends OncePerRequestFilter {
         String nickname = (String) claims.get("userNickname");
         Boolean slogin = (Boolean) claims.get("slogin");
         List<String> roleName = (List<String>) claims.get("roleName");
-        String userGrade = (String) claims.get("userGrade");
-        Integer userPoint = (Integer) claims.get("userPoint");
 
         UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName);
 

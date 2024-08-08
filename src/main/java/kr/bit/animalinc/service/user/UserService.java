@@ -2,6 +2,7 @@ package kr.bit.animalinc.service.user;
 
 import kr.bit.animalinc.entity.user.MemberRole;
 import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -136,10 +138,9 @@ public class UserService {
         } else {
             throw new IllegalStateException("User not found");
         }
-
-
     }
 
+    @Transactional
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
@@ -148,8 +149,74 @@ public class UserService {
     @Transactional
     public Users findByEmail(String email) {
         return userRepository.findByUserEmail(email).orElse(null);
+    }
+
+    @Transactional
+    public Users updateProfile(String email, String userRealname, String userNickname, String userBirthdate) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setUserRealname(userRealname);
+            user.setUserNickname(userNickname);
+            user.setUserBirthdate(LocalDate.parse(userBirthdate));
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    @Transactional
+    public boolean deleteUser(String email) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            userRepository.delete(optionalUser.get());
+            return true;
+        }
+        return false;
+    }
+
+    public List<Users> findAll() {
+        return userRepository.findAll();
+    }
+
+    public boolean changePassword(String email, String currentPassword, String newPassword) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            if (passwordEncoder.matches(currentPassword, user.getUserPw())) {
+                user.setUserPw(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<UsersDTO> getRankings() {
+        List<Users> users = userRepository.findAll();
+        return users.stream()
+                .filter(user -> user.getUserGrade() != null && user.getUserPoint() > 0)
+                .sorted((u1, u2) -> {
+                    int gradeComparison = compareGrade(u2.getUserGrade(), u1.getUserGrade());
+                    return gradeComparison != 0 ? gradeComparison : Integer.compare(u2.getUserPoint(), u1.getUserPoint());
+                })
+                .map(user -> {
+                    UsersDTO userDTO = new UsersDTO(
+                            user.getUserEmail(),
+                            user.getUserRealname(),
+                            user.getUserNickname(),
+                            user.isSlogin(),
+                            user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
+                    );
+                    userDTO.setUserGrade(user.getUserGrade());
+                    userDTO.setUserPoint(user.getUserPoint());
+                    return userDTO;
+                })
+                .collect(Collectors.toList());
 
     }
+
+    private int compareGrade(String grade1, String grade2) {
+        List<String> gradeOrder = List.of("Bronze", "Silver", "Gold");
+        return Integer.compare(gradeOrder.indexOf(grade1), gradeOrder.indexOf(grade2));
+    }
 }
-
-

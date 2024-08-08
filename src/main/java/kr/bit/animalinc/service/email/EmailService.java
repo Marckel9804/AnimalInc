@@ -35,7 +35,7 @@ public class EmailService {
         String certificationPassword = generator.createCertificationNumber();
         String link = "<a href='http://localhost:3600/login'>로그인 링크로 돌아가기</a>";
 
-        String content = String.format("%s <br> 임시비밀번호: %s <br><br> %s <br> 로그인 후 마이페이지에서 비밀번호를 수정해주세요.",
+        String content = String.format("<br> 임시비밀번호: %s <br><br> %s <br> 로그인 후 마이페이지에서 비밀번호를 수정해주세요.",
                 certificationPassword,
                 link);
 
@@ -51,7 +51,7 @@ public class EmailService {
         }
 
         // 이메일 전송
-        sendEmail(email, content, "animalinc@gmail.com");
+        sendEmail(email, content, "kwoong1923@gmail.com");
     }
 
     private void sendEmail(String email, String content, String fromEmail) throws MessagingException {

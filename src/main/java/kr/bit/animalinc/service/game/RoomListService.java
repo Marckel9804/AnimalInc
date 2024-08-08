@@ -2,10 +2,9 @@ package kr.bit.animalinc.service.game;
 
 import kr.bit.animalinc.dto.game.GameRoomDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
+import kr.bit.animalinc.entity.game.GameUsersStatus;
 import kr.bit.animalinc.repository.game.GameRoomRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Service
 public class RoomListService {
 
     @Autowired
     private GameRoomRepository gameRoomRepository;
+
+    @Autowired
+    private GameUsersStatusRepository gameUsersStatusRepository;
 
     // 공지사항 가져오기
 
@@ -44,6 +45,11 @@ public class RoomListService {
         gameRoom.setYear(0);
         // 방 생성
         gameRoomRepository.save(gameRoom);
+
     }
 
+    public GameRoomDTO getRoomById(String roomId) {
+        Optional<GameRoom> gameRoom = gameRoomRepository.findById(roomId);
+        return gameRoom.map(value -> new GameRoomDTO().toGameRoomDto(value)).orElse(null);
+    }
 }
