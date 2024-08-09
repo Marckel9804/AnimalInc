@@ -3,8 +3,7 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.entity.user.*;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -274,8 +273,23 @@ public class UserController {
         userDTO.setUserPoint(user.getUserPoint());
         userDTO.setUserGrade(user.getUserGrade());
         userDTO.setUserRuby(user.getUserRuby());
-        userDTO.setUserItem(user.getUserItem());
         userDTO.setUserPicture(user.getUserPicture());
+
+        List<UserItemDTO> userItemDTOS = user.getUserItems().stream()
+                        .map(userItem -> UserItemDTO.builder()
+                                .userItemId(userItem.getUserItemId())
+                                .itemId(userItem.getItem().getItemId())
+                                .itemName(userItem.getItem().getItemName())
+                                .itemDescription(userItem.getItem().getItemDescription())
+                                .itemType(userItem.getItem().getItemType())
+                                .itemImage(userItem.getItem().getItemImage())
+                                .itemRarity(userItem.getItem().getItemRarity())
+                                .acquiredDate(userItem.getAcquiredDate().toString())
+                                .build()
+                        ).collect(Collectors.toList());
+
+        userDTO.setUserItems(userItemDTOS);
+
         return ResponseEntity.ok(userDTO);
     }
 

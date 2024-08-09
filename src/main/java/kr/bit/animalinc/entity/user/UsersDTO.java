@@ -36,6 +36,7 @@ public class UsersDTO extends User {
     private String platform;
     private String userPicture;
 
+    private List<UserItemDTO> userItems;
 
     private List<String> roleName; //회원 역할(관리자와 회원 권한을 구분하기 위해서)
 
