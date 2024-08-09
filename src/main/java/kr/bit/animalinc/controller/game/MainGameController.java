@@ -34,6 +34,10 @@ public class MainGameController {
     public void gameStart(@PathVariable String roomId) {
         // 게임 시작 로직 추가
     }
+    @GetMapping("/gameOver/{roomId}")
+    public void gameOver(@PathVariable String roomId) {
+        // 게임 종료 로직 추가
+    }
 
     @GetMapping("/userStatus/{roomId}")
     public List<GameUsersStatusDTO> getUserStatus(@PathVariable String roomId, Principal principal) {
@@ -45,14 +49,14 @@ public class MainGameController {
         return gameService.getGameStockStatus(roomId);
     }
 
-    @GetMapping("/gameOver/{roomId}")
-    public void gameOver(@PathVariable String roomId) {
-        // 게임 종료 로직 추가
-    }
-
-    @GetMapping("/test/{roomId}/{turn}")
+    @GetMapping("/nextTurn/{roomId}/{turn}")
     public void nextTurn(@PathVariable String roomId, @PathVariable String turn) {
         gameService.increaTurn(roomId);
         gameService.addStock(roomId, Integer.parseInt(turn)+1);
+    }
+
+    @PostMapping("/update/userStatus")
+    public void updateUserStatus(@RequestBody GameUsersStatusDTO gameUsersStatusDTO) {
+        gameService.updateUserStatus(gameUsersStatusDTO);
     }
 }
