@@ -273,6 +273,7 @@ public class UserController {
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
         userDTO.setUserGrade(user.getUserGrade());
+        userDTO.setUserNum(user.getUserNum());
 
         return ResponseEntity.ok(userDTO);
     }

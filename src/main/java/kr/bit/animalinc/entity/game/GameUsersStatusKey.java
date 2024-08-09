@@ -1,13 +1,18 @@
 package kr.bit.animalinc.entity.game;
 
-import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@Embeddable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameUsersStatusKey implements Serializable {
-    private GameRoom gameRoom;
+
+    private String gameRoomId;
     private long userNum;
+
+    // equals() and hashCode() methods should be implemented as well
 }
