@@ -11,12 +11,14 @@ import kr.bit.animalinc.repository.game.GameStockStatusRepository;
 import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import kr.bit.animalinc.repository.game.stock.StockHistoryRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class GameService {
     @Autowired
@@ -61,6 +63,7 @@ public class GameService {
     public void addStock(String roomId, int turn){
         GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
         int year = Objects.requireNonNull(gameRoom).getYear();
+        log.info("year: " + year);
         if(turn == 1){
             initStock(gameRoom);
             return;
@@ -130,5 +133,10 @@ public class GameService {
 
     public void increaTurn(String roomId){
         gameRoomRepository.updateTurn(roomId);
+    }
+
+    public void updateUserStatus(GameUsersStatusDTO gameUsersStatusDTO){
+        GameUsersStatus gameUsersStatus = new GameUsersStatus(gameUsersStatusDTO);
+        gameUsersStatusRepository.save(gameUsersStatus);
     }
 }

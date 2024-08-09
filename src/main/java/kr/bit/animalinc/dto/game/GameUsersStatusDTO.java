@@ -21,6 +21,8 @@ public class GameUsersStatusDTO {
     private int timeMachine;
     private int shortSelling;
     private int worthInfo;
+    private int goodNews;
+    private int badNews;
     private int food1;
     private int food2;
     private int food3;
@@ -33,6 +35,10 @@ public class GameUsersStatusDTO {
     private int enter2;
     private int enter3;
     private int enter4;
+    private int elec1;
+    private int elec2;
+    private int elec3;
+    private int elec4;
     private int tech1;
     private int tech2;
     private int tech3;
@@ -50,6 +56,8 @@ public class GameUsersStatusDTO {
                 .timeMachine(gameUsersStatus.getTimeMachine())
                 .shortSelling(gameUsersStatus.getShortSelling())
                 .worthInfo(gameUsersStatus.getWorthInfo())
+                .goodNews(gameUsersStatus.getGoodNews())
+                .badNews(gameUsersStatus.getBadNews())
                 .food1(gameUsersStatus.getFood1())
                 .food2(gameUsersStatus.getFood2())
                 .food3(gameUsersStatus.getFood3())
@@ -62,6 +70,10 @@ public class GameUsersStatusDTO {
                 .enter2(gameUsersStatus.getEnter2())
                 .enter3(gameUsersStatus.getEnter3())
                 .enter4(gameUsersStatus.getEnter4())
+                .elec1(gameUsersStatus.getElec1())
+                .elec2(gameUsersStatus.getElec2())
+                .elec3(gameUsersStatus.getElec3())
+                .elec4(gameUsersStatus.getElec4())
                 .tech1(gameUsersStatus.getTech1())
                 .tech2(gameUsersStatus.getTech2())
                 .tech3(gameUsersStatus.getTech3())
