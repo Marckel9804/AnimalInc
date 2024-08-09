@@ -1,17 +1,21 @@
 package kr.bit.animalinc.service.game;
 
+import kr.bit.animalinc.dto.game.GameUsersStatusDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
 import kr.bit.animalinc.entity.game.GameStockStatus;
 import kr.bit.animalinc.entity.game.GameUsersStatus;
 import kr.bit.animalinc.entity.game.stock.StockHistory;
+import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.repository.game.GameRoomRepository;
 import kr.bit.animalinc.repository.game.GameStockStatusRepository;
 import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import kr.bit.animalinc.repository.game.stock.StockHistoryRepository;
+import kr.bit.animalinc.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -27,23 +31,26 @@ public class GameService {
     @Autowired
     StockHistoryRepository stockHistoryRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     public Optional<GameRoom> getGameRoomById(String roomId) {
         return gameRoomRepository.findById(roomId);
     }
 
-    public List<GameUsersStatus> getUserStatus(String roomId){
+    public List<GameUsersStatusDTO> getUserStatus(String roomId, String myEmail){
+        //어차피 JWT검사를 통과했을테니 present 검사를 안해도 되는거 아닐까? 조았쓰
+        Long myNum = userRepository.findByUserEmail(myEmail).get().getUserNum();
         GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
-        return gameUsersStatusRepository.findByGameRoom(gameRoom);
-    }
-
-    public GameUsersStatus getUserStatus(long userNum, String roomId) {
-        List<GameUsersStatus> gameUsersStatuses =  getUserStatus(roomId);
-        for(GameUsersStatus gameUsersStatus : gameUsersStatuses){
-            if(gameUsersStatus.getUserNum() == userNum){
-                return gameUsersStatus;
+        List<GameUsersStatusDTO> userList = gameUsersStatusRepository.findByGameRoom(gameRoom).stream().map(GameUsersStatusDTO::toGameUserStatusDTO).collect(Collectors.toList());
+        for(GameUsersStatusDTO user : userList){
+            Optional<Users> optionalUser = userRepository.findById(user.getUserNum());
+            optionalUser.ifPresent(foundUser -> user.setNickName(foundUser.getUserNickname()));
+            if(user.getUserNum() == myNum){
+                user.setMe(true);
             }
         }
-        return null;
+        return userList;
     }
 
     public List<GameStockStatus> getGameStockStatus(String roomId){
@@ -116,8 +123,12 @@ public class GameService {
         gameStockStatusRepository.saveAll(gameStockStatuses);
     }
 
-    // 추가된 메서드
-    public GameUsersStatus getGameUserStatus(long userNum) {
-        return gameUsersStatusRepository.findByUserNum(userNum);
+    public void addPlayerToGame(GameUsersStatus gameUsersStatus) {
+        gameUsersStatus.setCash(50000000); // 초기 캐시 설정
+        gameUsersStatusRepository.save(gameUsersStatus);
+    }
+
+    public void increaTurn(String roomId){
+        gameRoomRepository.updateTurn(roomId);
     }
 }

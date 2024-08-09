@@ -272,6 +272,7 @@ public class UserController {
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
+        userDTO.setUserGrade(user.getUserGrade());
 
         return ResponseEntity.ok(userDTO);
     }
@@ -353,77 +354,34 @@ public class UserController {
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
-        usersDTO.setUserRuby(user.getUserRuby()); //헤더
-        usersDTO.setUserPoint(user.getUserPoint()); //헤더
+        usersDTO.setUserPoint(user.getUserPoint()); // 추가: 사용자 포인트 설정
+        usersDTO.setUserGrade(user.getUserGrade()); // 추가: 사용자 등급 설정
         return ResponseEntity.ok(usersDTO);
     }
 
-//    @GetMapping("/players")
-//    public ResponseEntity<List<UsersDTO>> getAllPlayers() {
-//        List<Users> usersList = userService.findAll();
-//        List<UsersDTO> usersDTOList = usersList.stream()
-//                .map(user -> new UsersDTO(
-//                        user.getUserEmail(),
-//                        user.getUserPw(),
-//                        user.getUserNickname(),
-//                        user.isSlogin(),
-//                        user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
-//                        user.getUserGrade(),
-//                        user.getUserPoint()
-//                ))
-//                .collect(Collectors.toList());
-//        return ResponseEntity.ok(usersDTOList);
-//    }
-//
-//    @GetMapping("/me")
-//    public ResponseEntity<UsersDTO> getCurrentUser(HttpServletRequest request) {
-//        String token = jwtUtil.extractToken(request);
-//        if (token == null || !jwtUtil.validateToken(token)) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//        }
-//
-//        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
-//        Users user = userService.findByEmail(email);
-//
-//        if (user == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//
-//        UsersDTO usersDTO = new UsersDTO(
-//                user.getUserEmail(),
-//                user.getUserPw(),
-//                user.getUserNickname(),
-//                user.isSlogin(),
-//                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()),
-//        );
-//
-//        return ResponseEntity.ok(usersDTO);
-//    }
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
 
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        String currentPassword = request.get("currentPassword");
+        String newPassword = request.get("newPassword");
 
-//    @GetMapping("/get-profile")
-//    public ResponseEntity<?> getProfile(HttpServletRequest request) {
-//        String token = jwtUtil.extractToken(request);
-//        if (token == null || !jwtUtil.validateToken(token)) {
-//            return ResponseEntity.status(401).body("Invalid or missing token");
-//        }
-//
-//        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
-//        Users user = userService.findByEmail(email);
-//        if (user == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-//        }
-//
-//        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
-//        userDTO.setUserPw(user.getUserPw());
-//        userDTO.setUserBirthdate(user.getUserBirthdate());
-//        userDTO.setUserPoint(user.getUserPoint());
-//
-//        return ResponseEntity.ok(userDTO);
-//    }
+        boolean isPasswordChanged = userService.changePassword(email, currentPassword, newPassword);
 
+        if (!isPasswordChanged) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Current password is incorrect");
+        }
+
+        return ResponseEntity.ok("비밀번호가 변경되었습니다!");
+    }
+
+    @GetMapping("/rankings")
+    public ResponseEntity<List<UsersDTO>> getRankings() {
+        List<UsersDTO> rankings = userService.getRankings();
+        return ResponseEntity.ok(rankings);
+    }
 }
-
-
-
-

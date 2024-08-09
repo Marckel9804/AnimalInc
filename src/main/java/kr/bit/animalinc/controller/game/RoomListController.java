@@ -1,7 +1,6 @@
 package kr.bit.animalinc.controller.game;
 
 import kr.bit.animalinc.dto.game.GameRoomDTO;
-import kr.bit.animalinc.service.game.GameService;
 import kr.bit.animalinc.service.game.RoomListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

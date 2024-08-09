@@ -1,5 +1,13 @@
 package kr.bit.animalinc.controller.board;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.*;
+import kr.bit.animalinc.config.BucketConfig;
 import kr.bit.animalinc.dto.board.BoardWriteDTO;
 import kr.bit.animalinc.entity.board.BoardCommunity;
 import kr.bit.animalinc.service.board.BoardService;
@@ -8,9 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Principal;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/board")
@@ -19,6 +32,7 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
+    private final BucketConfig bucketConfig;
 
     @GetMapping("/test")
     public ResponseEntity<Map<String,Object>> testBoardController() {
@@ -77,4 +91,8 @@ public class BoardController {
 
         return ResponseEntity.ok(Map.of("data", "deleted"));
     }
+
+
+
+
 }
