@@ -2,9 +2,8 @@ package kr.bit.animalinc.service.game;
 
 import kr.bit.animalinc.dto.game.GameRoomDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
-import kr.bit.animalinc.entity.game.GameUsersStatus;
 import kr.bit.animalinc.repository.game.GameRoomRepository;
-import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class RoomListService {
 
     @Autowired
     private GameRoomRepository gameRoomRepository;
-
-    @Autowired
-    private GameUsersStatusRepository gameUsersStatusRepository;
 
     // 공지사항 가져오기
 
@@ -28,7 +25,9 @@ public class RoomListService {
         List<GameRoom> allRooms = gameRoomRepository.findAll();
         // Entity 를 DTO 로 변환
         List<GameRoomDTO> allDTORooms = new ArrayList<>();
-        allDTORooms.add(new GameRoomDTO().toGameRoomDto(allRooms.iterator().next()));
+        for (GameRoom room : allRooms) {
+            allDTORooms.add(new GameRoomDTO().toGameRoomDto(room));
+        }
         return allDTORooms;
     }
 
@@ -45,11 +44,23 @@ public class RoomListService {
         gameRoom.setYear(0);
         // 방 생성
         gameRoomRepository.save(gameRoom);
-
     }
 
-    public GameRoomDTO getRoomById(String roomId) {
-        Optional<GameRoom> gameRoom = gameRoomRepository.findById(roomId);
-        return gameRoom.map(value -> new GameRoomDTO().toGameRoomDto(value)).orElse(null);
+    // 방에 입장하면 플레이어 수 증가시키기
+    public void updatePlayerCount(String roomId) {
+        Optional<GameRoom> room = gameRoomRepository.findById(roomId);
+        GameRoom gameRoom = null;
+        /*
+        프론트에서 게임방 인원이 전부 차면 유저에게 방이 보이지 않도록 설정해두었기 때문에
+        백에서는 인원 수 증감만 처리하면 된다...
+         */
+        if(room.isPresent()) {
+            gameRoom = room.get();
+            log.info("gameRoom ? {}", gameRoom.toString());
+        }
+        gameRoom.setPlayers(gameRoom.getPlayers() + 1);
+        gameRoom.setBots(gameRoom.getBots() - 1);
+        gameRoomRepository.save(gameRoom);
     }
+
 }

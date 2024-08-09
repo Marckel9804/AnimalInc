@@ -33,8 +33,11 @@ public class RoomListController {
         roomListService.insertRoom(gameRoomDTO);
     }
 
-    @GetMapping("/room/{roomId}")
-    public GameRoomDTO getRoomById(@PathVariable String roomId) {
-        return roomListService.getRoomById(roomId);
+    // 방에 입장하면 플레이어 수 증가시키기
+    @PostMapping("/updateCount/{roomId}")
+    public void updatePlayerCount(@PathVariable String roomId) {
+        log.info("방 번호 받아오기 : {}", roomId);
+        roomListService.updatePlayerCount(roomId);
     }
+
 }
