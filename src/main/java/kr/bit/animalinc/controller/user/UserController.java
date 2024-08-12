@@ -3,8 +3,7 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.entity.user.*;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -177,6 +176,9 @@ public class UserController {
         refreshTokenCookie.setMaxAge(0);
         response.addCookie(refreshTokenCookie);
 
+        // 선택적으로 빈 Authorization 헤더를 설정하여 클라이언트 측의 액세스 토큰을 지웁니다
+        response.setHeader("Authorization", "");
+
         return ResponseEntity.ok("Logout successful");
     }
 
@@ -209,26 +211,31 @@ public class UserController {
         }
     }
 
-    //페이지 이동할때마다 리프레시 토큰으로 새로운 accesstoken 발급
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
-                    String refreshToken = cookie.getValue();
-                    if (jwtUtil.validateToken(refreshToken)) {
-                        Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
-                        String newAccessToken = jwtUtil.generateToken(claims, 30);
-                        log.info("Access token refreshed successfully for email: {}", claims.get("userEmail"));
-                        return ResponseEntity.ok().header("Authorization", "Bearer " + newAccessToken).build();
-                    }
-                }
-            }
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = jwtUtil.extractTokenFromCookie(request, "refreshToken");
+
+        if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
+            Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
+            String newAccessToken = jwtUtil.generateToken(claims, 30);
+            String newRefreshToken = jwtUtil.generateToken(claims, 60 * 24);
+
+            // 새로운 Refresh Token을 쿠키에 저장
+            Cookie newRefreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
+            newRefreshTokenCookie.setHttpOnly(true);
+            newRefreshTokenCookie.setSecure(true);
+            newRefreshTokenCookie.setPath("/");
+            newRefreshTokenCookie.setMaxAge(60 * 60 * 24);
+            response.addCookie(newRefreshTokenCookie);
+
+            response.setHeader("Authorization", "Bearer " + newAccessToken);
+
+            return ResponseEntity.ok("Tokens refreshed successfully");
         }
-        log.warn("Invalid refresh token");
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
     }
+
 
     @PostMapping("/check-profile")
     public ResponseEntity<?> completeProfile(@RequestBody Map<String, String> request, HttpServletRequest httpServletRequest) {
@@ -275,6 +282,22 @@ public class UserController {
         userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
+        userDTO.setUserRuby(user.getUserRuby());
+        userDTO.setUserPicture(user.getUserPicture());
+
+        List<UserItemDTO> userItemDTOS = user.getUserItems().stream()
+                        .map(userItem -> UserItemDTO.builder()
+                                .userItemId(userItem.getUserItemId())
+                                .itemId(userItem.getItem().getItemId())
+                                .itemName(userItem.getItem().getItemName())
+                                .itemDescription(userItem.getItem().getItemDescription())
+                                .itemType(userItem.getItem().getItemType())
+                                .itemImage(userItem.getItem().getItemImage())
+                                .itemRarity(userItem.getItem().getItemRarity())
+                                .build()
+                        ).collect(Collectors.toList());
+
+        userDTO.setUserItems(userItemDTOS);
         userDTO.setUserNum(user.getUserNum());
 
         return ResponseEntity.ok(userDTO);
@@ -385,5 +408,26 @@ public class UserController {
     public ResponseEntity<List<UsersDTO>> getRankings() {
         List<UsersDTO> rankings = userService.getRankings();
         return ResponseEntity.ok(rankings);
+    }
+
+    @PostMapping("/update-profile-picture")
+    public ResponseEntity<?> updateProfilePicture(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        String userPicture = request.get("userPicture");
+
+        boolean isUpdated = userService.updateUserProfilePicture(email, userPicture);
+
+        if (isUpdated) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Profile picture updated successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update profile picture");
+        }
     }
 }

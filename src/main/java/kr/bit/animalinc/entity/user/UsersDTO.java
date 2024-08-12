@@ -33,6 +33,11 @@ public class UsersDTO extends User {
     private String userItem; //회원이 가지고 있는 아이템
     private boolean slogin;
 
+    private String platform;
+    private String userPicture;
+
+    private List<UserItemDTO> userItems;
+
     private List<String> roleName; //회원 역할(관리자와 회원 권한을 구분하기 위해서)
 
     public UsersDTO(String userEmail, String userRealname, String userNickname, boolean slogin, List<String> roleName) {
@@ -54,6 +59,7 @@ public class UsersDTO extends User {
         map.put("userNickname", userNickname);
         map.put("slogin", slogin);
         map.put("roleName", roleName);
+        map.put("userPicture", userPicture);
         return map;
     }
 }
