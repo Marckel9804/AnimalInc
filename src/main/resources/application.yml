@@ -35,8 +35,21 @@ spring:
         starttls.enable: true
         starttls.required: true
 
-  redis:
-    host: localhost
-    port: 6379
+#  redis:
+#    host: localhost
+#    port: 6379
   cache:
     type: redis
+
+cloud:
+  aws:
+    credentials:
+      access-key: B9A0F1108DE5EDB2C7FD
+      secret-key: 51A88C5C7068C7A9B2868B1C7C0B5F68FAB6FA46
+    stack:
+      auto: false
+    region:
+      static: kr-standard
+    s3:
+      endpoint: https://kr.object.ncloudstorage.com
+      bucket: aniinc

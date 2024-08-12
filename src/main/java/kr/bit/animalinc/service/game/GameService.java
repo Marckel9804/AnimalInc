@@ -1,18 +1,24 @@
 package kr.bit.animalinc.service.game;
 
+import kr.bit.animalinc.dto.game.GameUsersStatusDTO;
 import kr.bit.animalinc.entity.game.GameRoom;
 import kr.bit.animalinc.entity.game.GameStockStatus;
 import kr.bit.animalinc.entity.game.GameUsersStatus;
 import kr.bit.animalinc.entity.game.stock.StockHistory;
+import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.repository.game.GameRoomRepository;
 import kr.bit.animalinc.repository.game.GameStockStatusRepository;
 import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import kr.bit.animalinc.repository.game.stock.StockHistoryRepository;
+import kr.bit.animalinc.repository.user.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class GameService {
     @Autowired
@@ -27,8 +33,11 @@ public class GameService {
     @Autowired
     StockHistoryRepository stockHistoryRepository;
 
-    public Optional<GameRoom> getGameRoomById(String gameRoomId) {
-        return gameRoomRepository.findById(gameRoomId);
+    @Autowired
+    UserRepository userRepository;
+
+    public Optional<GameRoom> getGameRoomById(String roomId) {
+        return gameRoomRepository.findById(roomId);
     }
 
     public List<GameUsersStatus> getUserStatus(String gameRoomId){
@@ -37,6 +46,20 @@ public class GameService {
 
     public GameUsersStatus getUserStatus(long userNum, String gameRoomId) {
         return gameUsersStatusRepository.findByUserNumAndGameRoomId(userNum, gameRoomId);
+    }
+    public List<GameUsersStatusDTO> getUserStatus(String roomId, String myEmail){
+        //어차피 JWT검사를 통과했을테니 present 검사를 안해도 되는거 아닐까? 조았쓰
+        Long myNum = userRepository.findByUserEmail(myEmail).get().getUserNum();
+        GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
+        List<GameUsersStatusDTO> userList = gameUsersStatusRepository.findByGameRoom(gameRoom).stream().map(GameUsersStatusDTO::toGameUserStatusDTO).collect(Collectors.toList());
+        for(GameUsersStatusDTO user : userList){
+            Optional<Users> optionalUser = userRepository.findById(user.getUserNum());
+            optionalUser.ifPresent(foundUser -> user.setNickName(foundUser.getUserNickname()));
+            if(user.getUserNum() == myNum){
+                user.setMe(true);
+            }
+        }
+        return userList;
     }
 
     public List<GameStockStatus> getGameStockStatus(String gameRoomId){
@@ -47,6 +70,7 @@ public class GameService {
     public void addStock(String gameRoomId, int turn){
         GameRoom gameRoom = gameRoomRepository.findById(gameRoomId).orElse(null);
         int year = Objects.requireNonNull(gameRoom).getYear();
+        log.info("year: " + year);
         if(turn == 1){
             initStock(gameRoom);
             return;
@@ -65,7 +89,7 @@ public class GameService {
                 gameStockStatuses2.add(gameStockStatus);
             }
             gameStockStatusRepository.saveAll(gameStockStatuses2);
-        }else if(turn == 12){
+        }else if(turn==12){
             List<GameStockStatus> gameStockStatuses = gameStockStatusRepository.findByGameRoomAndTurnOrderByStockId(gameRoom, turn-1);
             List<GameStockStatus> gameStockStatuses2 = new ArrayList<>();
             for (GameStockStatus stockStatus : gameStockStatuses) {
@@ -107,5 +131,19 @@ public class GameService {
             gameStockStatuses.add(gameStockStatus);
         }
         gameStockStatusRepository.saveAll(gameStockStatuses);
+    }
+
+    public void addPlayerToGame(GameUsersStatus gameUsersStatus) {
+        gameUsersStatus.setCash(50000000); // 초기 캐시 설정
+        gameUsersStatusRepository.save(gameUsersStatus);
+    }
+
+    public void increaTurn(String roomId){
+        gameRoomRepository.updateTurn(roomId);
+    }
+
+    public void updateUserStatus(GameUsersStatusDTO gameUsersStatusDTO){
+        GameUsersStatus gameUsersStatus = new GameUsersStatus(gameUsersStatusDTO);
+        gameUsersStatusRepository.save(gameUsersStatus);
     }
 }
