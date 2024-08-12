@@ -203,6 +203,7 @@ public class UserService {
                 })
                 .map(user -> {
                     UsersDTO userDTO = new UsersDTO(
+                            user.getUserNum(),
                             user.getUserEmail(),
                             user.getUserRealname(),
                             user.getUserNickname(),

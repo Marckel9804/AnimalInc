@@ -78,13 +78,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private void setAuthenticationContext(String token) {
         Map<String, Object> claims = jwtUtil.extractAllClaims(token);
+        Integer userNumInt = (Integer) claims.get("userNum");
+        Long userNum = userNumInt != null ? userNumInt.longValue() : null;
         String email = (String) claims.get("userEmail");
         String password = (String) claims.get("userPw");
         String nickname = (String) claims.get("userNickname");
         Boolean slogin = (Boolean) claims.get("slogin");
         List<String> roleName = (List<String>) claims.get("roleName");
 
-        UsersDTO usersDTO = new UsersDTO(email, password, nickname, slogin, roleName);
+        UsersDTO usersDTO = new UsersDTO(userNum, email, password, nickname, slogin, roleName);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usersDTO, null, usersDTO.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
