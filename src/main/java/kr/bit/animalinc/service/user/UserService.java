@@ -1,8 +1,8 @@
 package kr.bit.animalinc.service.user;
 
 import kr.bit.animalinc.entity.user.*;
-import kr.bit.animalinc.repository.user.ItemRepository;
-import kr.bit.animalinc.repository.user.UserItemRepository;
+import kr.bit.animalinc.repository.shop.ItemRepository;
+import kr.bit.animalinc.repository.shop.UserItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
