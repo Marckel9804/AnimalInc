@@ -49,4 +49,10 @@ public class RoomListController {
         roomListService.updatePlayerCount(roomId);
     }
 
+    // 방에서 나가면 플레이어 수 감소시키기
+    @PostMapping("/minusCount/{roomId}")
+    public void minusPlayerCount(@PathVariable String roomId) {
+        roomListService.minusPlayerCount(roomId);
+    }
+
 }

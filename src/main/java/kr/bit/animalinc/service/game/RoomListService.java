@@ -62,4 +62,23 @@ public class RoomListService {
         gameRoomRepository.save(gameRoom);
     }
 
+    // 방에서 나가면 플레이어 수 감소시키기
+    public void minusPlayerCount(String roomId) {
+        Optional<GameRoom> room = gameRoomRepository.findById(roomId);
+        GameRoom gameRoom = null;
+        if(room.isPresent()) {
+            gameRoom = room.get();
+            log.info("gameRoom ? {}", gameRoom.toString());
+        }
+        gameRoom.setBots(gameRoom.getBots() + 1);
+        gameRoom.setPlayers(gameRoom.getPlayers() - 1);
+
+        // players 수가 0 이 되면 방 삭제 !
+        if(gameRoom.getPlayers() == 0) {
+            gameRoomRepository.delete(gameRoom);
+        } else {
+            gameRoomRepository.save(gameRoom);
+        }
+    }
+
 }
