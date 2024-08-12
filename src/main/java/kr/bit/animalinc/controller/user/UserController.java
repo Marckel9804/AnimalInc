@@ -294,7 +294,6 @@ public class UserController {
                                 .itemType(userItem.getItem().getItemType())
                                 .itemImage(userItem.getItem().getItemImage())
                                 .itemRarity(userItem.getItem().getItemRarity())
-                                .acquiredDate(userItem.getAcquiredDate().toString())
                                 .build()
                         ).collect(Collectors.toList());
 

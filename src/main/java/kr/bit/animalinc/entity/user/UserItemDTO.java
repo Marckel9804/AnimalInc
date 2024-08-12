@@ -15,5 +15,4 @@ public class UserItemDTO {
     private String itemType;        // 아이템 타입 (예: 프로필 사진, 포인트 아이템 등)
     private String itemRarity;      // 아이템 희귀도 (예: Common, Rare, Epic)
     private String itemImage;       // 아이템 이미지 URL
-    private String acquiredDate;    // 아이템 획득 날짜
 }

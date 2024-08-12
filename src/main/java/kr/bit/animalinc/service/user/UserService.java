@@ -241,7 +241,6 @@ public class UserService {
         UserItem userItem = UserItem.builder()
                 .user(user)
                 .item(item)
-                .acquiredDate(LocalDate.now())
                 .build();
 
         userItemRepository.save(userItem);
