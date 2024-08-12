@@ -18,8 +18,6 @@ public class RoomListService {
     @Autowired
     private GameRoomRepository gameRoomRepository;
 
-    // 공지사항 가져오기
-
     // 방 리스트 가져오기
     public List<GameRoomDTO> selectAllRoom() {
         List<GameRoom> allRooms = gameRoomRepository.findAll();
@@ -34,6 +32,7 @@ public class RoomListService {
     // 방 만들기
     public void insertRoom(GameRoomDTO gameRoomDTO) {
         GameRoom gameRoom = new GameRoom();
+        int randomYear = (int)(Math.random() * 10) + 2014;
         // init 정보 세팅
         gameRoom.setGameRoomId(gameRoomDTO.getGameRoomId());
         gameRoom.setTurn(0);
@@ -41,7 +40,7 @@ public class RoomListService {
         gameRoom.setBots(gameRoomDTO.getPlayers() - 1); // 봇 수 = 게임방 전체 인원수 - 입장한 인원
         gameRoom.setRoomName(gameRoomDTO.getRoomName());
         gameRoom.setTier(gameRoomDTO.getTier());
-        gameRoom.setYear(0);
+        gameRoom.setYear(randomYear);
         // 방 생성
         gameRoomRepository.save(gameRoom);
     }
