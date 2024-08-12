@@ -1,4 +1,4 @@
-package kr.bit.animalinc.repository.user;
+package kr.bit.animalinc.repository.shop;
 
 import kr.bit.animalinc.entity.user.UserItem;
 import kr.bit.animalinc.entity.user.Users;

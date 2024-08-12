@@ -3,7 +3,7 @@ package kr.bit.animalinc.service.shop;
 
 import kr.bit.animalinc.entity.user.Item;
 import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.repository.user.ItemRepository;
+import kr.bit.animalinc.repository.shop.ItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
