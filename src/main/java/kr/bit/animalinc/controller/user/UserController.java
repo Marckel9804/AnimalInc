@@ -272,6 +272,8 @@ public class UserController {
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
+        userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
+        userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
         userDTO.setUserNum(user.getUserNum());
 
@@ -355,8 +357,7 @@ public class UserController {
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
-        usersDTO.setUserPoint(user.getUserPoint()); // 추가: 사용자 포인트 설정
-        usersDTO.setUserGrade(user.getUserGrade()); // 추가: 사용자 등급 설정
+
         return ResponseEntity.ok(usersDTO);
     }
 
