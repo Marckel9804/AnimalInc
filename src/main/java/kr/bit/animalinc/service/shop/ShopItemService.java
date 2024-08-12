@@ -5,23 +5,21 @@ import kr.bit.animalinc.entity.user.Item;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.repository.shop.ItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ShopItemService {
 
-    @Autowired
-    private ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserItemService userItemService;
+    private final UserItemService userItemService;
 
     // 전체 아이템 목록을 가져오는 메서드
     public List<Item> getAllItems() {
