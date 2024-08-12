@@ -11,12 +11,14 @@ import kr.bit.animalinc.repository.game.GameStockStatusRepository;
 import kr.bit.animalinc.repository.game.GameUsersStatusRepository;
 import kr.bit.animalinc.repository.game.stock.StockHistoryRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class GameService {
     @Autowired
@@ -38,6 +40,13 @@ public class GameService {
         return gameRoomRepository.findById(roomId);
     }
 
+//    public List<GameUsersStatus> getUserStatus(String gameRoomId){
+//        return gameUsersStatusRepository.findByGameRoomid(gameRoomId);
+//    }
+
+//    public GameUsersStatus getUserStatus(long userNum, String gameRoomId) {
+//        return gameUsersStatusRepository.findByUserNumAndGameRoomId(userNum, gameRoomId);
+//    }
     public List<GameUsersStatusDTO> getUserStatus(String roomId, String myEmail){
         //어차피 JWT검사를 통과했을테니 present 검사를 안해도 되는거 아닐까? 조았쓰
         Long myNum = userRepository.findByUserEmail(myEmail).get().getUserNum();
@@ -53,19 +62,20 @@ public class GameService {
         return userList;
     }
 
-    public List<GameStockStatus> getGameStockStatus(String roomId){
-        GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
+    public List<GameStockStatus> getGameStockStatus(String gameRoomId){
+        GameRoom gameRoom = gameRoomRepository.findById(gameRoomId).orElse(null);
         return gameStockStatusRepository.findByGameRoom(gameRoom);
     }
 
-    public void addStock(String roomId, int turn){
-        GameRoom gameRoom = gameRoomRepository.findById(roomId).orElse(null);
+    public void addStock(String gameRoomId, int turn){
+        GameRoom gameRoom = gameRoomRepository.findById(gameRoomId).orElse(null);
         int year = Objects.requireNonNull(gameRoom).getYear();
+        log.info("year: " + year);
         if(turn == 1){
             initStock(gameRoom);
             return;
         }else if(turn < 12 && turn > 1){
-            List<StockHistory> stocks = stockHistoryRepository.findAllByYearAndMonthOrderByStock(year,turn);
+            List<StockHistory> stocks = stockHistoryRepository.findAllByYearAndMonthOrderByStock(year, turn);
             List<GameStockStatus> gameStockStatuses = gameStockStatusRepository.findByGameRoomAndTurnOrderByStockId(gameRoom, turn-1);
             List<GameStockStatus> gameStockStatuses2 = new ArrayList<>();
             for(int i=0; i<stocks.size(); i++){
@@ -100,7 +110,7 @@ public class GameService {
         List<GameStockStatus> gameStockStatuses = new ArrayList<>();
         int year = Objects.requireNonNull(gameRoom).getYear();
         // 초기 설정이니까 무조건 1월 가중치만 가져오기
-        List<StockHistory> stocks = stockHistoryRepository.findAllByYearAndMonthOrderByStock(year,1);
+        List<StockHistory> stocks = stockHistoryRepository.findAllByYearAndMonthOrderByStock(year, 1);
         Random rand = new Random();
         for(StockHistory stock : stocks){
             // 0 = 주식이름, 1-연도, 2-턴
@@ -130,5 +140,10 @@ public class GameService {
 
     public void increaTurn(String roomId){
         gameRoomRepository.updateTurn(roomId);
+    }
+
+    public void updateUserStatus(GameUsersStatusDTO gameUsersStatusDTO){
+        GameUsersStatus gameUsersStatus = new GameUsersStatus(gameUsersStatusDTO);
+        gameUsersStatusRepository.save(gameUsersStatus);
     }
 }
