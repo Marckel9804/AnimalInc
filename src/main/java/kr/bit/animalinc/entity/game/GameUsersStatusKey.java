@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class GameUsersStatusKey implements Serializable {
 
-    private String gameRoomId;
+    private GameRoom gameRoom;
     private long userNum;
 
     // equals() and hashCode() methods should be implemented as well

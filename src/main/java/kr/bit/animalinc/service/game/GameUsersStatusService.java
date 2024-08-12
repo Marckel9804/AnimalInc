@@ -21,10 +21,10 @@ public class GameUsersStatusService {
     @Autowired
     private GameRoomRepository gameRoomRepository;
 
-    public void saveUserStatus(String gameRoomId, long userNum) {
+    public void saveUserStatus(GameRoom gameRoom, long userNum) {
         GameUsersStatus gameUsersStatus = new GameUsersStatus();
 
-        gameUsersStatus.setGameRoomId(gameRoomId);
+        gameUsersStatus.setGameRoom(gameRoom);
         gameUsersStatus.setUserNum(userNum);
         gameUsersStatus.setCash(50000000);  // 기본값 설정
 

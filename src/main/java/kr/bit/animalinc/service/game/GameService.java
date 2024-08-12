@@ -40,13 +40,13 @@ public class GameService {
         return gameRoomRepository.findById(roomId);
     }
 
-    public List<GameUsersStatus> getUserStatus(String gameRoomId){
-        return gameUsersStatusRepository.findByGameRoomId(gameRoomId);
-    }
+//    public List<GameUsersStatus> getUserStatus(String gameRoomId){
+//        return gameUsersStatusRepository.findByGameRoomid(gameRoomId);
+//    }
 
-    public GameUsersStatus getUserStatus(long userNum, String gameRoomId) {
-        return gameUsersStatusRepository.findByUserNumAndGameRoomId(userNum, gameRoomId);
-    }
+//    public GameUsersStatus getUserStatus(long userNum, String gameRoomId) {
+//        return gameUsersStatusRepository.findByUserNumAndGameRoomId(userNum, gameRoomId);
+//    }
     public List<GameUsersStatusDTO> getUserStatus(String roomId, String myEmail){
         //어차피 JWT검사를 통과했을테니 present 검사를 안해도 되는거 아닐까? 조았쓰
         Long myNum = userRepository.findByUserEmail(myEmail).get().getUserNum();

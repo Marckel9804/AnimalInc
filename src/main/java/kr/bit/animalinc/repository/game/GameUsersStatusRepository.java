@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GameUsersStatusRepository extends JpaRepository<GameUsersStatus, Long> {
-    List<GameUsersStatus> findByGameRoomId(String gameRoomId);
+//    List<GameUsersStatus> findByGameRoomId(String gameRoomid);
     List<GameUsersStatus> findByGameRoom(GameRoom gameRoom);
-    GameUsersStatus findByUserNumAndGameRoomId(long userNum, String gameRoomId);
+//    GameUsersStatus findByUserNumAndGameRoomId(long userNum, String gameRoomId);
 }
