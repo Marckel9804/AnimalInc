@@ -1,26 +1,15 @@
 package kr.bit.animalinc.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Table(name = "item") // 테이블 이름 수정
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Item {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Setter
+@Getter
+public class UserItemDTO {
+    private Long userItemId;
     private Long itemId;
-
     private String itemName;          // 아이템 이름
     private String itemDescription;   // 아이템 설명
     private String itemType;          // 아이템 타입 (예: 프로필 사진, 포인트 아이템 등)

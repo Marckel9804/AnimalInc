@@ -1,8 +1,8 @@
 package kr.bit.animalinc.service.user;
 
-import kr.bit.animalinc.entity.user.MemberRole;
-import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.repository.shop.ItemRepository;
+import kr.bit.animalinc.repository.shop.UserItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
+    private final UserItemRepository userItemRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -221,6 +223,34 @@ public class UserService {
         return Integer.compare(gradeOrder.indexOf(grade1), gradeOrder.indexOf(grade2));
     }
 
+    public boolean updateUserProfilePicture(String email, String userPicture) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setUserPicture(userPicture);
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void acquireItem(Long userNum, Long itemId) {
+        Users user = userRepository.findById(userNum).orElseThrow(() -> new RuntimeException("User not found"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserItem userItem = UserItem.builder()
+                .user(user)
+                .item(item)
+                .build();
+
+        userItemRepository.save(userItem);
+    }
+
+    public List<UserItem> getUserItems(Long userNum) {
+        Users user = userRepository.findById(userNum).orElseThrow(() -> new RuntimeException("User not found"));
+        return userItemRepository.findByUser(user);
+    }
 
     // 새로운 메서드 추가: 사용자가 동물을 선택하는 기능
     @Transactional
@@ -234,6 +264,7 @@ public class UserService {
                     .filter(animal -> animal.getAnimalId() == animalId)  // '==' 연산자로 기본 자료형 비교
                     .findFirst()
                     .orElse(null);
+
 
             // 선택된 동물이 있을 경우, 사용자의 선택된 동물로 설정
             if (selectedAnimal != null) {
