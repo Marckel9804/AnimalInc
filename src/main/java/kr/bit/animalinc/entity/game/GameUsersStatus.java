@@ -14,6 +14,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameUsersStatus {
+
     @Id
     @ManyToOne
     @JoinColumn(name = "gameRoomId")
@@ -21,6 +22,7 @@ public class GameUsersStatus {
     private GameRoom gameRoom;
 
     @Id
+    @Column(name = "userNum")
     private long userNum;
 
     private int lottery;
