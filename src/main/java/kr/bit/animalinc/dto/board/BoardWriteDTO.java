@@ -4,6 +4,7 @@ import kr.bit.animalinc.entity.board.BoardCommunity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
@@ -17,10 +18,12 @@ public class BoardWriteDTO {
     private String bcCode;
     private String title;
     private String content;
-//    private List<File> files;
+    private List<String> files;
     private String writeDate;
 
     public BoardCommunity toBoardCommunity() {
+
+
         BoardCommunity tmp = BoardCommunity.builder()
                 .type(type)
                 .userEmail(userEmail)
@@ -28,6 +31,7 @@ public class BoardWriteDTO {
                 .title(title)
                 .content(content)
                 .writeDate(writeDate)
+                .files(files)
                 .build();
 
         return tmp;
