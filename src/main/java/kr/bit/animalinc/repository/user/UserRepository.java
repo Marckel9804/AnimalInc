@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     @EntityGraph(attributePaths = {"memRoleList"})
     @Query("select user from Users user where user.userEmail = :userEmail")
     Users getRole(@Param("userEmail") String userEmail);
+    // 새로운 메서드 추가: 이메일을 통해 사용자와 소유한 동물 정보 조회
+    @Query("select u from Users u left join fetch u.ownedAnimals where u.userEmail = :userEmail")
+    Optional<Users> findWithOwnedAnimalsByEmail(@Param("userEmail") String userEmail);
 }
