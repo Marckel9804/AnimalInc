@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import kr.bit.animalinc.entity.board.BoardFAQ;
+import kr.bit.animalinc.entity.board.Comment;
+import kr.bit.animalinc.entity.user.Item;
+import kr.bit.animalinc.entity.shop.Animal;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -38,6 +41,23 @@ public class Users{
     private String platform;
 
     private String userPicture; //프로필 사진 URL
+
+    @ManyToOne
+    @JoinColumn(name = "last_gacha_result_id")
+    private Animal lastGachaResult;  // 최근 가차 결과를 저장하는 필드(상점 추가)
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_owned_animals",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "animal_id")
+    )
+    private List<Animal> ownedAnimals = new ArrayList<>(); // 소유한 동물 목록 필
+
+    public void addOwnedAnimal(Animal animal) {
+        ownedAnimals.add(animal);
+    }
+//상점
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default

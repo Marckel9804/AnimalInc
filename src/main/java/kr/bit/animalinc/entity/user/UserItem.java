@@ -3,6 +3,8 @@ package kr.bit.animalinc.entity.user;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.*;
+
 import lombok.*;
 
 import java.time.LocalDate;
@@ -29,5 +31,4 @@ public class UserItem {
     private Item item;     // 아이템 정보
 
     private LocalDate acquiredDate; //아이템 획득 날짜
-
 }

@@ -53,6 +53,7 @@ public class UsersDTO extends User {
 
     public Map<String, Object> getClaims() {
         Map<String, Object> map = new HashMap<>();
+//        map.put("userNum", userNum); // 가차상점추가
         map.put("userEmail", userEmail);
         map.put("userRealname", userRealname);
         map.put("userNickname", userNickname);
