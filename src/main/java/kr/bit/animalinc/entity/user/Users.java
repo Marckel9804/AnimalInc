@@ -1,5 +1,7 @@
 package kr.bit.animalinc.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import kr.bit.animalinc.entity.board.BoardFAQ;
 import lombok.*;
@@ -15,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Users{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -46,6 +49,7 @@ public class Users{
     private List<BoardFAQ> boardFAQS;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<UserItem> userItems = new ArrayList<>();
 
     //회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다. 관리자(ADMIN)는 0으로 저장
