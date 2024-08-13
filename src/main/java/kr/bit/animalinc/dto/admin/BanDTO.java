@@ -18,12 +18,13 @@ public class BanDTO {
     private String banReason;
     private Date bannedDate;
 
+
     public BanList toEntity() {
-        return BanDTO.builder()
+        return BanList.builder()
                 .userNum(userNum)
-                .banReason(banReason)
                 .bannedDate(bannedDate)
                 .unlockDate(unlockDate)
-                .build().toEntity();
+                .banReason(banReason)
+                .build();
     }
 }

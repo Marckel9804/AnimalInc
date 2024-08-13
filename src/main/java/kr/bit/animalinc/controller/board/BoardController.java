@@ -49,6 +49,18 @@ public class BoardController {
         return boardService.getBoardCommunities(type, page, size);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchBoard(
+            @RequestParam String title,
+            @RequestParam String tag,
+            @RequestParam(defaultValue = "notice") String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        System.out.println("search tag is" + tag);
+
+        return ResponseEntity.ok(boardService.searchBoard(title, tag, type, page, size));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BoardCommunity> getBoardCommunity(@PathVariable Long id) {
         return ResponseEntity.ok(boardService.getBoardCommunity(id));
