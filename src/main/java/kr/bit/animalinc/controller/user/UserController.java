@@ -3,7 +3,9 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.entity.user.UserItemDTO;
+import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -17,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import kr.bit.animalinc.entity.shop.Animal; // 추가된 부분
 
 @RestController
 @RequiredArgsConstructor
@@ -137,6 +138,7 @@ public class UserController {
                     .collect(Collectors.toList());
 
             UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -276,17 +278,39 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        UsersDTO userDTO = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        // UserItem을 UserItemDTO로 변환
+        List<UserItemDTO> userItemDTOs = user.getUserItems().stream()
+                .map(userItem -> UserItemDTO.builder()
+                        .userItemId(userItem.getUserItemId())
+                        .itemId(userItem.getItem().getItemId())
+                        .itemName(userItem.getItem().getItemName())
+                        .itemDescription(userItem.getItem().getItemDescription())
+                        .itemType(userItem.getItem().getItemType())
+                        .itemRarity(userItem.getItem().getItemRarity())
+                        .itemImage(userItem.getItem().getItemImage())
+                        .build())
+                .collect(Collectors.toList());
+
+        UsersDTO userDTO = new UsersDTO(
+                user.getUserNum(),
+                user.getUserEmail(),
+                user.getUserRealname(),
+                user.getUserNickname(),
+                user.isSlogin(),
+                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
+        );
+
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
-        userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
-        userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
-        userDTO.setUserNum(user.getUserNum());
+        userDTO.setUserRuby(user.getUserRuby());
+        userDTO.setUserPicture(user.getUserPicture());
+        userDTO.setUserItems(userItemDTOs);  // DTO 리스트로 설정
 
         return ResponseEntity.ok(userDTO);
     }
+
 
     @PostMapping("/update-profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
