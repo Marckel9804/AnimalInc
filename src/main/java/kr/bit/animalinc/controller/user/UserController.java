@@ -3,6 +3,7 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.bit.animalinc.dto.game.GameRoomDTO;
 import kr.bit.animalinc.entity.user.*;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
@@ -366,6 +367,9 @@ public class UserController {
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
+
+        usersDTO.setUserGrade(user.getUserGrade());
+        usersDTO.setUserPoint(user.getUserPoint());
 
         return ResponseEntity.ok(usersDTO);
     }
