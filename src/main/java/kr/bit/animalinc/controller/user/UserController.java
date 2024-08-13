@@ -283,22 +283,6 @@ public class UserController {
         userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
-        userDTO.setUserRuby(user.getUserRuby());
-        userDTO.setUserPicture(user.getUserPicture());
-
-        List<UserItemDTO> userItemDTOS = user.getUserItems().stream()
-                        .map(userItem -> UserItemDTO.builder()
-                                .userItemId(userItem.getUserItemId())
-                                .itemId(userItem.getItem().getItemId())
-                                .itemName(userItem.getItem().getItemName())
-                                .itemDescription(userItem.getItem().getItemDescription())
-                                .itemType(userItem.getItem().getItemType())
-                                .itemImage(userItem.getItem().getItemImage())
-                                .itemRarity(userItem.getItem().getItemRarity())
-                                .build()
-                        ).collect(Collectors.toList());
-
-        userDTO.setUserItems(userItemDTOS);
         userDTO.setUserNum(user.getUserNum());
 
         return ResponseEntity.ok(userDTO);
