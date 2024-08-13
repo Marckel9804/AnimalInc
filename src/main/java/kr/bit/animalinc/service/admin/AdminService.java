@@ -142,4 +142,22 @@ public class AdminService {
         userCountRepository.deleteById(id);
         return "success";
     }
+
+    @Transactional
+    public List<UserCount> findUSByMonth(int Month) {
+        List<UserCount> result = userCountRepository.findByMonth(Month);
+        return result;
+    }
+
+    @Transactional
+    public List<UserCount> findUS(int year,int month) {
+        List<UserCount> result = userCountRepository.findByYearAndMonth(year,month);
+        return result;
+    }
+
+    @Transactional
+    public List<TierCount> findTC(int year,int month) {
+        List<TierCount> result = tierCountRepository.findByYearAndMonth(year,month);
+        return result;
+    }
 }

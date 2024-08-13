@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import kr.bit.animalinc.entity.shop.Animal; // 추가된 부분
 
 @RestController
 @RequiredArgsConstructor
@@ -436,5 +437,24 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update profile picture");
         }
+    }
+
+    // 새로운 메서드 추가: 사용자가 동물을 선택하는 기능
+    @PostMapping("/select-animal")
+    public ResponseEntity<?> selectAnimal(@RequestBody Map<String, Long> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        Long animalId = request.get("animalId");
+
+        boolean isSelected = userService.selectAnimal(email, animalId);
+        if (!isSelected) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to select animal");
+        }
+
+        return ResponseEntity.ok("Animal selected successfully");
     }
 }

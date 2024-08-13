@@ -42,28 +42,34 @@ public class Users{
 
     private String userPicture; //프로필 사진 URL
 
+    // 최근 가차 결과를 저장하는 필드 (상점에서 사용)
     @ManyToOne
     @JoinColumn(name = "last_gacha_result_id")
-    private Animal lastGachaResult;  // 최근 가차 결과를 저장하는 필드(상점 추가)
+    private Animal lastGachaResult;
 
+    // 추가된 부분: 소유한 동물 목록 필드
     @ManyToMany
     @JoinTable(
             name = "user_owned_animals",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "animal_id")
     )
-    private List<Animal> ownedAnimals = new ArrayList<>(); // 소유한 동물 목록 필
-
+    private List<Animal> ownedAnimals = new ArrayList<>(); // 소유한 동물 목록
+    // 추가된 부분: 선택된 동물 필드
+    @ManyToOne
+    @JoinColumn(name = "selected_animal_id")
+    private Animal selectedAnimal;  // 사용자가 선택한 동물
+    // 소유한 동물 목록에 동물을 추가하는 메서드
     public void addOwnedAnimal(Animal animal) {
         ownedAnimals.add(animal);
     }
-//상점
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
-    private List<MemberRole> memRoleList = new ArrayList<>();
+    private List<MemberRole> memRoleList = new ArrayList<>(); // 회원의 역할 목록
 
 
+    // 유저가 보유한 아이템 목록
     //여기서 부터
     @OneToMany(mappedBy = "qUser" , cascade = CascadeType.ALL)
     private List<BoardFAQ> boardFAQS;
@@ -82,7 +88,8 @@ public class Users{
         userItems.add(userItem);
     }
 
-    public void removeUserItem(Item item) { //유저가 아이템을 사용했을 때 제거되도록
+    // 유저가 아이템을 사용했을 때 아이템 목록에서 제거하는 메서드
+    public void removeUserItem(Item item) {
         userItems.removeIf(ui -> ui.getItem().equals(item));
     }
 }
