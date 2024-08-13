@@ -27,11 +27,18 @@ public class BoardCommunity {
 
     private String content;
 
-//    private List<File> files;
 
     private String writeDate;
 
     private String userEmail;
+
+    @ElementCollection
+    @CollectionTable(name = "imgFiles", joinColumns = @JoinColumn(name = "bcId"))
+    @Column(name = "fileName")
+    private List<String> files;
+
+//    @OneToMany(mappedBy = "boardCommunity", cascade = CascadeType.ALL)
+//    private List<BoardImage> boardImageList;
 
     @OneToMany(mappedBy = "boardCommunity", cascade = CascadeType.ALL)
     private List<Comment> comments;
