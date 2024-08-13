@@ -3,8 +3,7 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.entity.user.*;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import kr.bit.animalinc.entity.shop.Animal; // 추가된 부분
 
 @RestController
 @RequiredArgsConstructor
@@ -105,7 +105,7 @@ public class UserController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(),user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
         String accessToken = jwtUtil.generateToken(claims, 30);
@@ -136,7 +136,7 @@ public class UserController {
                     .map(Enum::name)
                     .collect(Collectors.toList());
 
-            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -177,6 +177,9 @@ public class UserController {
         refreshTokenCookie.setMaxAge(0);
         response.addCookie(refreshTokenCookie);
 
+        // 선택적으로 빈 Authorization 헤더를 설정하여 클라이언트 측의 액세스 토큰을 지웁니다
+        response.setHeader("Authorization", "");
+
         return ResponseEntity.ok("Logout successful");
     }
 
@@ -209,26 +212,31 @@ public class UserController {
         }
     }
 
-    //페이지 이동할때마다 리프레시 토큰으로 새로운 accesstoken 발급
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
-                    String refreshToken = cookie.getValue();
-                    if (jwtUtil.validateToken(refreshToken)) {
-                        Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
-                        String newAccessToken = jwtUtil.generateToken(claims, 30);
-                        log.info("Access token refreshed successfully for email: {}", claims.get("userEmail"));
-                        return ResponseEntity.ok().header("Authorization", "Bearer " + newAccessToken).build();
-                    }
-                }
-            }
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = jwtUtil.extractTokenFromCookie(request, "refreshToken");
+
+        if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
+            Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
+            String newAccessToken = jwtUtil.generateToken(claims, 30);
+            String newRefreshToken = jwtUtil.generateToken(claims, 60 * 24);
+
+            // 새로운 Refresh Token을 쿠키에 저장
+            Cookie newRefreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
+            newRefreshTokenCookie.setHttpOnly(true);
+            newRefreshTokenCookie.setSecure(true);
+            newRefreshTokenCookie.setPath("/");
+            newRefreshTokenCookie.setMaxAge(60 * 60 * 24);
+            response.addCookie(newRefreshTokenCookie);
+
+            response.setHeader("Authorization", "Bearer " + newAccessToken);
+
+            return ResponseEntity.ok("Tokens refreshed successfully");
         }
-        log.warn("Invalid refresh token");
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
     }
+
 
     @PostMapping("/check-profile")
     public ResponseEntity<?> completeProfile(@RequestBody Map<String, String> request, HttpServletRequest httpServletRequest) {
@@ -268,10 +276,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        UsersDTO userDTO = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
+        userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
+        userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
         userDTO.setUserNum(user.getUserNum());
 
@@ -349,14 +359,14 @@ public class UserController {
         }
 
         UsersDTO usersDTO = new UsersDTO(
+                user.getUserNum(),
                 user.getUserEmail(),
                 user.getUserPw(),
                 user.getUserNickname(),
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
-        usersDTO.setUserPoint(user.getUserPoint()); // 추가: 사용자 포인트 설정
-        usersDTO.setUserGrade(user.getUserGrade()); // 추가: 사용자 등급 설정
+
         return ResponseEntity.ok(usersDTO);
     }
 
@@ -384,5 +394,45 @@ public class UserController {
     public ResponseEntity<List<UsersDTO>> getRankings() {
         List<UsersDTO> rankings = userService.getRankings();
         return ResponseEntity.ok(rankings);
+    }
+
+    @PostMapping("/update-profile-picture")
+    public ResponseEntity<?> updateProfilePicture(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail").toString();
+        String userPicture = request.get("userPicture");
+
+        boolean isUpdated = userService.updateUserProfilePicture(email, userPicture);
+
+        if (isUpdated) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Profile picture updated successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update profile picture");
+        }
+    }
+
+    // 새로운 메서드 추가: 사용자가 동물을 선택하는 기능
+    @PostMapping("/select-animal")
+    public ResponseEntity<?> selectAnimal(@RequestBody Map<String, Long> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        Long animalId = request.get("animalId");
+
+        boolean isSelected = userService.selectAnimal(email, animalId);
+        if (!isSelected) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to select animal");
+        }
+
+        return ResponseEntity.ok("Animal selected successfully");
     }
 }

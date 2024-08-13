@@ -1,7 +1,9 @@
 package kr.bit.animalinc.controller.game;
 
 import kr.bit.animalinc.dto.game.GameRoomDTO;
+import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.service.game.RoomListService;
+import kr.bit.animalinc.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,14 @@ public class RoomListController {
     @Autowired
     private RoomListService roomListService;
 
-    // 공지사항 가져오기
+    @Autowired
+    private UserService userService;
+
+    // 로그인한 유저 정보 받아오기
+    @GetMapping("/selectUser/{userEmail}")
+    public Users selectUser(@PathVariable String userEmail) {
+        return userService.findByEmail(userEmail);
+    }
 
     // 방 리스트 가져오기
     @GetMapping("/selectAllRoom")
@@ -38,6 +47,12 @@ public class RoomListController {
     public void updatePlayerCount(@PathVariable String roomId) {
         log.info("방 번호 받아오기 : {}", roomId);
         roomListService.updatePlayerCount(roomId);
+    }
+
+    // 방에서 나가면 플레이어 수 감소시키기
+    @PostMapping("/minusCount/{roomId}")
+    public void minusPlayerCount(@PathVariable String roomId) {
+        roomListService.minusPlayerCount(roomId);
     }
 
 }

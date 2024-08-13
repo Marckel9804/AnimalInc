@@ -47,4 +47,36 @@ public class UploadRestController {
             return ResponseEntity.badRequest().body("File is empty");
         }
     }
+
+    @PostMapping("/upload/imglist")
+    public ResponseEntity<?> uploadImage(@RequestParam("files") List<MultipartFile> files,
+                                         @RequestParam("folderName") String folderName) throws IOException {
+        System.out.println(files.toString());
+        List<Map<String, String>> result = new ArrayList<>();
+        for (MultipartFile file : files) {
+            System.out.println(file.getOriginalFilename());
+            if (!file.isEmpty()) {
+                String[] splitName = file.getOriginalFilename().split("\\.");
+                String uploadName = folderName + "/" + splitName[0] + "_" + UUID.randomUUID().toString() + "." + splitName[1];
+
+                amazonS3Client.putObject(new PutObjectRequest("aniinc", uploadName, file.getInputStream(), null)
+                        .withCannedAcl(CannedAccessControlList.PublicRead));
+
+                String url = amazonS3Client.getUrl("aniinc", uploadName).toString();
+                System.out.println(url);
+
+                Map<String, String> map = new HashMap<>();
+                map.put("url", url);
+                map.put("upLoadFilename", uploadName);
+
+                result.add(map);
+            } else {
+                Map<String, String> map = new HashMap<>();
+                map.put("error","empty file");
+                result.add(map);
+            }
+
+        }
+        return ResponseEntity.ok(result);
+    }
 }

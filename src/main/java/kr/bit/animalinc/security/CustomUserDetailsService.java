@@ -29,6 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         UsersDTO usersDTO = new UsersDTO(
+                user.getUserNum(),
                 user.getUserEmail(),
                 user.getUserPw(),
                 user.getUserNickname(),

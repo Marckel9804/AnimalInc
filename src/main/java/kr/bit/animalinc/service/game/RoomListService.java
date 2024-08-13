@@ -18,8 +18,6 @@ public class RoomListService {
     @Autowired
     private GameRoomRepository gameRoomRepository;
 
-    // 공지사항 가져오기
-
     // 방 리스트 가져오기
     public List<GameRoomDTO> selectAllRoom() {
         List<GameRoom> allRooms = gameRoomRepository.findAll();
@@ -34,6 +32,7 @@ public class RoomListService {
     // 방 만들기
     public void insertRoom(GameRoomDTO gameRoomDTO) {
         GameRoom gameRoom = new GameRoom();
+        int randomYear = (int)(Math.random() * 10) + 2014;
         // init 정보 세팅
         gameRoom.setGameRoomId(gameRoomDTO.getGameRoomId());
         gameRoom.setTurn(0);
@@ -41,7 +40,7 @@ public class RoomListService {
         gameRoom.setBots(gameRoomDTO.getPlayers() - 1); // 봇 수 = 게임방 전체 인원수 - 입장한 인원
         gameRoom.setRoomName(gameRoomDTO.getRoomName());
         gameRoom.setTier(gameRoomDTO.getTier());
-        gameRoom.setYear(0);
+        gameRoom.setYear(randomYear);
         // 방 생성
         gameRoomRepository.save(gameRoom);
     }
@@ -61,6 +60,25 @@ public class RoomListService {
         gameRoom.setPlayers(gameRoom.getPlayers() + 1);
         gameRoom.setBots(gameRoom.getBots() - 1);
         gameRoomRepository.save(gameRoom);
+    }
+
+    // 방에서 나가면 플레이어 수 감소시키기
+    public void minusPlayerCount(String roomId) {
+        Optional<GameRoom> room = gameRoomRepository.findById(roomId);
+        GameRoom gameRoom = null;
+        if(room.isPresent()) {
+            gameRoom = room.get();
+            log.info("gameRoom ? {}", gameRoom.toString());
+        }
+        gameRoom.setBots(gameRoom.getBots() + 1);
+        gameRoom.setPlayers(gameRoom.getPlayers() - 1);
+
+        // players 수가 0 이 되면 방 삭제 !
+        if(gameRoom.getPlayers() == 0) {
+            gameRoomRepository.delete(gameRoom);
+        } else {
+            gameRoomRepository.save(gameRoom);
+        }
     }
 
 }

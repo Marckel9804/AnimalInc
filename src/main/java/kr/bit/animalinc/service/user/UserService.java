@@ -1,14 +1,15 @@
 package kr.bit.animalinc.service.user;
 
-import kr.bit.animalinc.entity.user.MemberRole;
-import kr.bit.animalinc.entity.user.Users;
-import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.repository.shop.ItemRepository;
+import kr.bit.animalinc.repository.shop.UserItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import kr.bit.animalinc.entity.shop.Animal;  // 추가된 부분
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
+    private final UserItemRepository userItemRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -201,6 +204,7 @@ public class UserService {
                 })
                 .map(user -> {
                     UsersDTO userDTO = new UsersDTO(
+                            user.getUserNum(),
                             user.getUserEmail(),
                             user.getUserRealname(),
                             user.getUserNickname(),
@@ -219,4 +223,58 @@ public class UserService {
         List<String> gradeOrder = List.of("Bronze", "Silver", "Gold");
         return Integer.compare(gradeOrder.indexOf(grade1), gradeOrder.indexOf(grade2));
     }
+
+    public boolean updateUserProfilePicture(String email, String userPicture) {
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setUserPicture(userPicture);
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void acquireItem(Long userNum, Long itemId) {
+        Users user = userRepository.findById(userNum).orElseThrow(() -> new RuntimeException("User not found"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserItem userItem = UserItem.builder()
+                .user(user)
+                .item(item)
+                .build();
+
+        userItemRepository.save(userItem);
+    }
+
+    public List<UserItem> getUserItems(Long userNum) {
+        Users user = userRepository.findById(userNum).orElseThrow(() -> new RuntimeException("User not found"));
+        return userItemRepository.findByUser(user);
+    }
+
+    // 새로운 메서드 추가: 사용자가 동물을 선택하는 기능
+    @Transactional
+    public boolean selectAnimal(String email, Long animalId) {
+        // 사용자 정보를 가져오며, 소유한 동물 목록을 함께 로드
+        Optional<Users> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            // 소유한 동물 목록에서 선택된 동물을 찾음
+            Animal selectedAnimal = user.getOwnedAnimals().stream()
+                    .filter(animal -> animal.getAnimalId() == animalId)  // '==' 연산자로 기본 자료형 비교
+                    .findFirst()
+                    .orElse(null);
+
+
+            // 선택된 동물이 있을 경우, 사용자의 선택된 동물로 설정
+            if (selectedAnimal != null) {
+                user.setSelectedAnimal(selectedAnimal);
+                userRepository.save(user); // 변경 사항 저장
+                return true; // 선택 성공
+            }
+        }
+        return false; // 선택 실패
+    }
 }
+
