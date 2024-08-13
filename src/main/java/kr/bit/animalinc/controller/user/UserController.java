@@ -3,7 +3,9 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.entity.user.UserItemDTO;
+import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -17,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import kr.bit.animalinc.entity.shop.Animal; // 추가된 부분
 
 @RestController
 @RequiredArgsConstructor
@@ -137,6 +138,7 @@ public class UserController {
                     .collect(Collectors.toList());
 
             UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
