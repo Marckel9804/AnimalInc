@@ -53,3 +53,10 @@ cloud:
     s3:
       endpoint: https://kr.object.ncloudstorage.com
       bucket: aniinc
+
+toss:
+  payments:
+    client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+    secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+    success-url: http://localhost:8080/payments/success
+    fail-url: http://localhost:8080/payments/fail
