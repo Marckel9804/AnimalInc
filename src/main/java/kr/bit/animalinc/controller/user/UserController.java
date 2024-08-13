@@ -275,33 +275,39 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        UsersDTO userDTO = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        // UserItem을 UserItemDTO로 변환
+        List<UserItemDTO> userItemDTOs = user.getUserItems().stream()
+                .map(userItem -> UserItemDTO.builder()
+                        .userItemId(userItem.getUserItemId())
+                        .itemId(userItem.getItem().getItemId())
+                        .itemName(userItem.getItem().getItemName())
+                        .itemDescription(userItem.getItem().getItemDescription())
+                        .itemType(userItem.getItem().getItemType())
+                        .itemRarity(userItem.getItem().getItemRarity())
+                        .itemImage(userItem.getItem().getItemImage())
+                        .build())
+                .collect(Collectors.toList());
+
+        UsersDTO userDTO = new UsersDTO(
+                user.getUserNum(),
+                user.getUserEmail(),
+                user.getUserRealname(),
+                user.getUserNickname(),
+                user.isSlogin(),
+                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
+        );
+
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
-        userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
-        userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
         userDTO.setUserRuby(user.getUserRuby());
         userDTO.setUserPicture(user.getUserPicture());
-
-        List<UserItemDTO> userItemDTOS = user.getUserItems().stream()
-                        .map(userItem -> UserItemDTO.builder()
-                                .userItemId(userItem.getUserItemId())
-                                .itemId(userItem.getItem().getItemId())
-                                .itemName(userItem.getItem().getItemName())
-                                .itemDescription(userItem.getItem().getItemDescription())
-                                .itemType(userItem.getItem().getItemType())
-                                .itemImage(userItem.getItem().getItemImage())
-                                .itemRarity(userItem.getItem().getItemRarity())
-                                .build()
-                        ).collect(Collectors.toList());
-
-        userDTO.setUserItems(userItemDTOS);
-        userDTO.setUserNum(user.getUserNum());
+        userDTO.setUserItems(userItemDTOs);  // DTO 리스트로 설정
 
         return ResponseEntity.ok(userDTO);
     }
+
 
     @PostMapping("/update-profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
