@@ -79,10 +79,18 @@ public class BoardService {
 
 
     public Page<BoardCommunity> getBoardCommunities(String type,int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("writeDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bcId").descending());
         return boardCommunityRepository.findByType(type,pageable);
     }
 
+    public Page<BoardCommunity> searchBoard(String title, String bcCode, String type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bcId").descending());
+        System.out.println("\n\n\n"+bcCode);
+        if(bcCode.equals("all")) {
+            return boardCommunityRepository.findByTitleContainingAndType(title, type, pageable);
+        }
+        return boardCommunityRepository.findByTitleContainingAndBcCodeAndType(title, bcCode , type ,pageable);
+    }
 
 }
 
