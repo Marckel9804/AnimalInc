@@ -2,7 +2,7 @@ package kr.bit.animalinc.service.board;
 
 import kr.bit.animalinc.entity.board.BoardCommunity;
 import kr.bit.animalinc.entity.board.BoardFAQ;
-import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.board.Comment;
 import kr.bit.animalinc.repository.board.BoardCommunityRepository;
 import kr.bit.animalinc.repository.board.BoardFAQRepository;
 import kr.bit.animalinc.repository.board.CommentRepository;
@@ -83,6 +83,19 @@ public class BoardService {
         return boardCommunityRepository.findByType(type,pageable);
     }
 
+    @Transactional
+    public List<BoardCommunity> getUserPosts(String userEmail) {
+        return boardCommunityRepository.findByUserEmailOrderByWriteDateDesc(userEmail);
+    }
 
+    @Transactional
+    public List<Comment> getUserComments(String userEmail) {
+        return commentRepository.findByBoardCommunity_UserEmailOrderByCreatDateDesc(userEmail);
+    }
+
+    @Transactional
+    public List<BoardFAQ> getUserReports(String userEmail) {
+        return boardFAQRepository.findUserReports(userEmail);
+    }
 }
 
