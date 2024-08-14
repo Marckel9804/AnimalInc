@@ -14,6 +14,9 @@ public interface BoardCommunityRepository extends JpaRepository<BoardCommunity, 
 
     Optional<BoardCommunity> findByUserEmail(String userEmail);
 
+    Page<BoardCommunity> findByTitleContainingAndBcCodeAndType(String title, String bcCode, String type, Pageable pageable);
+    Page<BoardCommunity> findByTitleContainingAndType(String title, String type, Pageable pageable);
+
     Page<BoardCommunity> findByType(String type, Pageable pageable);
 
     List<BoardCommunity> findByUserEmailOrderByWriteDateDesc(String userEmail);
