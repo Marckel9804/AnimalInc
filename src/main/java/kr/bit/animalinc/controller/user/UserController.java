@@ -3,7 +3,11 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.bit.animalinc.dto.game.GameRoomDTO;
 import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.entity.user.UserItemDTO;
+import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -104,7 +108,7 @@ public class UserController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+        UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(),user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
         Map<String, Object> claims = authenticatedUser.getClaims();
 
         String accessToken = jwtUtil.generateToken(claims, 30);
@@ -135,7 +139,8 @@ public class UserController {
                     .map(Enum::name)
                     .collect(Collectors.toList());
 
-            UsersDTO authenticatedUser = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+
             Map<String, Object> claims = authenticatedUser.getClaims();
 
             String accessToken = jwtUtil.generateToken(claims, 30);
@@ -275,33 +280,39 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        UsersDTO userDTO = new UsersDTO(user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList()));
+        // UserItem을 UserItemDTO로 변환
+        List<UserItemDTO> userItemDTOs = user.getUserItems().stream()
+                .map(userItem -> UserItemDTO.builder()
+                        .userItemId(userItem.getUserItemId())
+                        .itemId(userItem.getItem().getItemId())
+                        .itemName(userItem.getItem().getItemName())
+                        .itemDescription(userItem.getItem().getItemDescription())
+                        .itemType(userItem.getItem().getItemType())
+                        .itemRarity(userItem.getItem().getItemRarity())
+                        .itemImage(userItem.getItem().getItemImage())
+                        .build())
+                .collect(Collectors.toList());
+
+        UsersDTO userDTO = new UsersDTO(
+                user.getUserNum(),
+                user.getUserEmail(),
+                user.getUserRealname(),
+                user.getUserNickname(),
+                user.isSlogin(),
+                user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
+        );
+
         userDTO.setUserPw(user.getUserPw());
         userDTO.setUserBirthdate(user.getUserBirthdate());
         userDTO.setUserPoint(user.getUserPoint());
-        userDTO.setUserRuby(user.getUserRuby()); // userRuby 설정
-        userDTO.setUserGrade(user.getUserGrade()); // userRuby 설정
         userDTO.setUserGrade(user.getUserGrade());
         userDTO.setUserRuby(user.getUserRuby());
         userDTO.setUserPicture(user.getUserPicture());
-
-        List<UserItemDTO> userItemDTOS = user.getUserItems().stream()
-                        .map(userItem -> UserItemDTO.builder()
-                                .userItemId(userItem.getUserItemId())
-                                .itemId(userItem.getItem().getItemId())
-                                .itemName(userItem.getItem().getItemName())
-                                .itemDescription(userItem.getItem().getItemDescription())
-                                .itemType(userItem.getItem().getItemType())
-                                .itemImage(userItem.getItem().getItemImage())
-                                .itemRarity(userItem.getItem().getItemRarity())
-                                .build()
-                        ).collect(Collectors.toList());
-
-        userDTO.setUserItems(userItemDTOS);
-        userDTO.setUserNum(user.getUserNum());
+        userDTO.setUserItems(userItemDTOs);  // DTO 리스트로 설정
 
         return ResponseEntity.ok(userDTO);
     }
+
 
     @PostMapping("/update-profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
@@ -374,12 +385,16 @@ public class UserController {
         }
 
         UsersDTO usersDTO = new UsersDTO(
+                user.getUserNum(),
                 user.getUserEmail(),
                 user.getUserPw(),
                 user.getUserNickname(),
                 user.isSlogin(),
                 user.getMemRoleList().stream().map(Enum::name).collect(Collectors.toList())
         );
+
+        usersDTO.setUserGrade(user.getUserGrade());
+        usersDTO.setUserPoint(user.getUserPoint());
 
         return ResponseEntity.ok(usersDTO);
     }
@@ -429,5 +444,24 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update profile picture");
         }
+    }
+
+    // 새로운 메서드 추가: 사용자가 동물을 선택하는 기능
+    @PostMapping("/select-animal")
+    public ResponseEntity<?> selectAnimal(@RequestBody Map<String, Long> request, HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractToken(httpRequest);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String email = jwtUtil.extractAllClaims(token).get("userEmail", String.class);
+        Long animalId = request.get("animalId");
+
+        boolean isSelected = userService.selectAnimal(email, animalId);
+        if (!isSelected) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to select animal");
+        }
+
+        return ResponseEntity.ok("Animal selected successfully");
     }
 }
