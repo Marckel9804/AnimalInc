@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.util.JWTUtil;
+import kr.bit.animalinc.util.RedisTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,8 @@ import java.util.Map;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+
+    private final RedisTokenService redisTokenService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -55,16 +59,47 @@ public class JWTFilter extends OncePerRequestFilter {
             accessToken = authHeader.substring(7);
         }
 
-        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
-            setAuthenticationContext(accessToken);
+        // 액세스 토큰이 존재하는 경우
+        if (accessToken != null) {
+            //토큰이 블랙리스트에 있는가?
+            if (redisTokenService.isTokenBlacklisted(accessToken)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token is blacklisted");
+                return;
+            }
+        }
+
+        if (jwtUtil.validateToken(accessToken)) {
+            Long userNum = jwtUtil.extractAllClaims(accessToken).get("userNum", Long.class);
+
+            //Redis에 저장된 액세스 토큰과 일치하는지 확인
+            String storedToken = redisTokenService.getAccessToken(userNum);
+            if (storedToken != null && storedToken.equals(accessToken)) {
+                setAuthenticationContext(accessToken);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token is invalid");
+                return;
+            }
         } else {
+            // 액세스 토큰이 없을 경우 쿠키에서 리프레시 토큰 확인
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("refreshToken".equals(cookie.getName())) {
                         String refreshToken = cookie.getValue();
+
+                        // 리프레시 토큰 유효성 검사
                         if (jwtUtil.validateToken(refreshToken)) {
+                            Long userNum = jwtUtil.extractAllClaims(refreshToken).get("userNum", Long.class);
+
+                            // 새로운 액세스 토큰 발급
                             String newAccessToken = jwtUtil.generateToken(jwtUtil.extractAllClaims(refreshToken), 30);
+
+                            //새로운 액세스 토큰을 Redis에 저장
+                            redisTokenService.storeAccessToken(newAccessToken, userNum, Duration.ofMinutes(30));
+
+                            // 새로ㅜㅇㄴ 액세스 토큰을 헤더에 추가하고 인증 컨텍스트 설정
                             response.setHeader("Authorization", "Bearer " + newAccessToken);
                             setAuthenticationContext(newAccessToken);
                         }
@@ -72,7 +107,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 }
             }
         }
-
+        // 다음 필터로 요청 전달
         filterChain.doFilter(request, response);
     }
 
