@@ -46,6 +46,7 @@ public class GameUsersStatusDTO {
     private int cash;
     private boolean isMe = false;
     private String nickName;
+    private String shortSellRecord;
 
     public static GameUsersStatusDTO toGameUserStatusDTO(GameUsersStatus gameUsersStatus) {
         return GameUsersStatusDTO.builder()
@@ -80,6 +81,6 @@ public class GameUsersStatusDTO {
                 .tech4(gameUsersStatus.getTech4())
                 .cash(gameUsersStatus.getCash())
                 .nickName("ananymous")
-                .isMe(false).build();
+                .isMe(false).shortSellRecord("").build();
     }
 }
