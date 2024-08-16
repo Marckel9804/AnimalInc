@@ -73,5 +73,4 @@ public class AdminController {
         System.out.println(result);
         return ResponseEntity.ok(result);
     }
-
 }
