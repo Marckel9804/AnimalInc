@@ -395,7 +395,7 @@ public class UserController {
 
         usersDTO.setUserGrade(user.getUserGrade());
         usersDTO.setUserPoint(user.getUserPoint());
-
+        usersDTO.setUserPicture(user.getUserPicture());
         return ResponseEntity.ok(usersDTO);
     }
 
