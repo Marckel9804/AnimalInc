@@ -57,6 +57,7 @@ public class Users {
     private List<Animal> ownedAnimals = new ArrayList<>(); // 소유한 동물 목록
 
     // 선택된 동물 필드
+
     @ManyToOne
     @JoinColumn(name = "selected_animal_id")
     private Animal selectedAnimal;  // 사용자가 선택한 동물

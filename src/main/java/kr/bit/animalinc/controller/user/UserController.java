@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.bit.animalinc.dto.game.GameRoomDTO;
+import kr.bit.animalinc.entity.shop.Animal;
 import kr.bit.animalinc.entity.user.*;
 import kr.bit.animalinc.entity.user.UserItemDTO;
 import kr.bit.animalinc.entity.user.Users;
@@ -13,9 +14,11 @@ import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import kr.bit.animalinc.service.shop.AnimalService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -266,6 +269,8 @@ public class UserController {
         Users user = userService.completeProfile(email, birthdate, nickname);
         return ResponseEntity.ok(user);
     }
+    @Autowired
+    private AnimalService animalService;  // AnimalService 주입
 
     @GetMapping("/get-profile")
     public ResponseEntity<?> getProfile(HttpServletRequest request) {
@@ -293,6 +298,18 @@ public class UserController {
                         .build())
                 .collect(Collectors.toList());
 
+        // selected_animal_id로 animalImage 가져오기
+        String animalImage = null;
+        Animal selectedAnimal = user.getSelectedAnimal();
+        if (selectedAnimal != null) {
+            // int 타입의 animalId를 Long 타입으로 변환
+            Long animalId = Long.valueOf(selectedAnimal.getAnimalId());
+            Animal foundAnimal = animalService.findById(animalId);
+            if (foundAnimal != null) {
+                animalImage = foundAnimal.getAnimalImage();
+            }
+        }
+
         UsersDTO userDTO = new UsersDTO(
                 user.getUserNum(),
                 user.getUserEmail(),
@@ -309,6 +326,7 @@ public class UserController {
         userDTO.setUserRuby(user.getUserRuby());
         userDTO.setUserPicture(user.getUserPicture());
         userDTO.setUserItems(userItemDTOs);  // DTO 리스트로 설정
+        userDTO.setAnimalImage(animalImage); // 선택된 캐릭터 이미지 추가
 
         return ResponseEntity.ok(userDTO);
     }
