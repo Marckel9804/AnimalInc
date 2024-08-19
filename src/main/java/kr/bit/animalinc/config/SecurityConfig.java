@@ -2,6 +2,7 @@ package kr.bit.animalinc.config;
 
 import kr.bit.animalinc.security.filter.JWTFilter;
 import kr.bit.animalinc.util.JWTUtil;
+import kr.bit.animalinc.util.RedisTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
+    private final RedisTokenService redisTokenService;  // RedisTokenService 추가
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -74,7 +76,7 @@ public class SecurityConfig {
         });
 
         //jwt검증이 우선이고 그 다음 사용자 정보 기반으로 한 인증토큰 추가해라
-        httpSecurity.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new JWTFilter(jwtUtil, redisTokenService), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
