@@ -23,6 +23,8 @@ public class Payment {
     private String paymentName;
     private Integer amount;
     private LocalDateTime paymentDate;
+    private String userEmail;  // 결제와 연결된 사용자의 이메일
+    private int rubyAmount;    // 결제 시 구매한 루비 수량
 
-    // Other relevant fields...
+
 }

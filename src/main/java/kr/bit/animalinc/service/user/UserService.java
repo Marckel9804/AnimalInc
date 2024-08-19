@@ -1,6 +1,7 @@
 package kr.bit.animalinc.service.user;
 
 import kr.bit.animalinc.entity.user.*;
+import kr.bit.animalinc.repository.payment.PaymentRepository;
 import kr.bit.animalinc.repository.shop.ItemRepository;
 import kr.bit.animalinc.repository.shop.UserItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
@@ -24,6 +25,7 @@ public class UserService {
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final PasswordEncoder passwordEncoder;
+
 
     @Transactional
     public Users login(String email, String password) {
@@ -276,5 +278,21 @@ public class UserService {
         }
         return false; // 선택 실패
     }
+    // 루비 업데이트 메서드 추가
+    @Transactional
+    public void updateUserRuby(String email, int rubyAmount) {
+        Users user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
+        int newRubyAmount = user.getUserRuby() + rubyAmount;
+        if (newRubyAmount < 0) {
+            throw new IllegalArgumentException("Ruby amount cannot be negative");
+        }
+
+        user.setUserRuby(newRubyAmount);
+        userRepository.save(user);
+    }
 }
+
+
+
