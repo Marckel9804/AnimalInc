@@ -2,7 +2,7 @@ package kr.bit.animalinc.service.board;
 
 import kr.bit.animalinc.entity.board.BoardCommunity;
 import kr.bit.animalinc.entity.board.BoardFAQ;
-import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.entity.board.Comment;
 import kr.bit.animalinc.repository.board.BoardCommunityRepository;
 import kr.bit.animalinc.repository.board.BoardFAQRepository;
 import kr.bit.animalinc.repository.board.CommentRepository;
@@ -79,10 +79,33 @@ public class BoardService {
 
 
     public Page<BoardCommunity> getBoardCommunities(String type,int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("writeDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bcId").descending());
         return boardCommunityRepository.findByType(type,pageable);
     }
 
+    public Page<BoardCommunity> searchBoard(String title, String bcCode, String type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bcId").descending());
+        System.out.println("\n\n\n"+bcCode);
+        if(bcCode.equals("all")) {
+            return boardCommunityRepository.findByTitleContainingAndType(title, type, pageable);
+        }
+        return boardCommunityRepository.findByTitleContainingAndBcCodeAndType(title, bcCode , type ,pageable);
+    }
 
+    @Transactional
+    public List<BoardCommunity> getUserPosts(String userEmail) {
+        return boardCommunityRepository.findByUserEmailOrderByWriteDateDesc(userEmail);
+
+    }
+
+    @Transactional
+    public List<Comment> getUserComments(String userEmail) {
+        return commentRepository.findByBoardCommunity_UserEmailOrderByCreatDateDesc(userEmail);
+    }
+
+    @Transactional
+    public List<BoardFAQ> getUserReports(String userEmail) {
+        return boardFAQRepository.findUserReports(userEmail);
+    }
 }
 

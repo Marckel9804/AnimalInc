@@ -1,6 +1,7 @@
 package kr.bit.animalinc.entity.admin;
 
 import jakarta.persistence.*;
+import kr.bit.animalinc.dto.admin.BanDTO;
 import lombok.*;
 
 import java.util.Date;
@@ -22,4 +23,6 @@ public class BanList {
     private Date unlockDate;
     private String banReason;
     private Date bannedDate;
+
+
 }
