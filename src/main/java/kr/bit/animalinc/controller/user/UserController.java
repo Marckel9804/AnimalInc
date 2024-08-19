@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,13 @@ public class UserController {
             return ResponseEntity.status(401).body("이메일이나 비밀번호를 확인해주세요");
         }
 
+        // 만약 액세스토큰이 redis에 존재하면 삭제 및 블랙리스트 추가
+        String existingToken = redisTokenService.getAccessToken(user.getUserNum());
+        if (existingToken != null) {
+            redisTokenService.deleteAccessToken(user.getUserNum());
+            redisTokenService.addToBlacklist(existingToken);
+        }
+
         List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
@@ -115,6 +123,7 @@ public class UserController {
         String accessToken = jwtUtil.generateToken(claims, 30);
         String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
 
+        // 생성한 액세스토큰을 redis에 저장
         redisTokenService.storeAccessToken(accessToken, user.getUserNum(), Duration.ofMinutes(30));
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
@@ -137,6 +146,13 @@ public class UserController {
 
         try {
             Users user = userService.socialLogin(userRealname, email, platform);
+
+            // 만약 액세스토큰이 redis에 존재하면 삭제 및 블랙리스트 추가
+            String existingToken = redisTokenService.getAccessToken(user.getUserNum());
+            if (existingToken != null) {
+                redisTokenService.deleteAccessToken(user.getUserNum());
+                redisTokenService.addToBlacklist(existingToken);
+            }
 
             List<String> roles = user.getMemRoleList().stream()
                     .map(Enum::name)
@@ -300,15 +316,51 @@ public class UserController {
             return ResponseEntity.status(400).body("모든 정보를 입력해주세요");
         }
 
+        // 생년월일 형식 검사
+        if (!isValidBirthdate(birthdate)) {
+            return ResponseEntity.status(400).body("유효하지 않은 생년월일 형식입니다");
+        }
+
         boolean nicknameAvailable = userService.checkNickname(nickname);
         if (!nicknameAvailable) {
             return ResponseEntity.status(400).body("Nickname already in use");
         }
 
-
         Users user = userService.completeProfile(email, birthdate, nickname);
         return ResponseEntity.ok(user);
     }
+
+    private boolean isValidBirthdate(String birthdate) {
+        if (!birthdate.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return false;
+        }
+
+        try {
+            String[] parts = birthdate.split("-");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            int day = Integer.parseInt(parts[2]);
+
+            if (year < 1900 || year > 2024) {
+                return false;
+            }
+
+            if (month < 1 || month > 12) {
+                return false;
+            }
+
+            if (day < 1 || day > 31) {
+                return false;
+            }
+
+            // 날짜 객체로 유효성 검사 (윤년 등)
+            LocalDate date = LocalDate.of(year, month, day);
+            return date != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     @GetMapping("/get-profile")
     public ResponseEntity<?> getProfile(HttpServletRequest request) {

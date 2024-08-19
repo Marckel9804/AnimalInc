@@ -1,5 +1,6 @@
 package kr.bit.animalinc.security.filter;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -57,6 +58,27 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             accessToken = authHeader.substring(7);
+
+            try {
+                if (jwtUtil.validateToken(accessToken)) {
+                    Long userNum = jwtUtil.extractAllClaims(accessToken).get("userNum", Long.class  );
+                    String storedToken = redisTokenService.getAccessToken(userNum);
+
+                    if (storedToken != null && storedToken.equals(accessToken)) {
+                        setAuthenticationContext(accessToken);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.getWriter().write("Token is valid");
+                        return;
+                    }
+                } else {
+                    throw new ExpiredJwtException(null, null, "Token has expired");
+                }
+            } catch (ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("세션이 만료되어 자동으로 로그아웃됩니다");
+                return;
+            }
         }
 
         // 액세스 토큰이 존재하는 경우
