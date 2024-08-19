@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:latest
+    container_name: aniRedis
+    ports:
+      - "6379:6379"
+
+  app:
+    image: animalinc_tmp
+    environment:
+      - SPRING_REDIS_HOST=aniRedis
+    depends_on:
+      - redis
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
