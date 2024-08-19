@@ -3,9 +3,11 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.bit.animalinc.dto.admin.UserCountDTO;
 import kr.bit.animalinc.entity.user.UserItemDTO;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.entity.user.UsersDTO;
+import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.email.EmailService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
@@ -33,6 +35,7 @@ public class UserController {
     private final EmailService emailService;
     private final JWTUtil jwtUtil;
     private final RedisTokenService redisTokenService;
+    private final CountService countService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
@@ -113,6 +116,11 @@ public class UserController {
             redisTokenService.addToBlacklist(existingToken);
         }
 
+        // 로그인 시 금일 사용자 수에 집계 (중복적용 안됨)
+        countService.increaseUserCount(user.getUserNum());
+        LocalDate today = LocalDate.now();
+        UserCountDTO result = countService.getUserCountDTO(today);
+
         List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
@@ -135,7 +143,12 @@ public class UserController {
 
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        return ResponseEntity.ok("Login successful");
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Login successful");
+        responseBody.put("user", authenticatedUser);
+        responseBody.put("todayUserCount", result);
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @PostMapping("/social-login")
@@ -153,6 +166,11 @@ public class UserController {
                 redisTokenService.deleteAccessToken(user.getUserNum());
                 redisTokenService.addToBlacklist(existingToken);
             }
+
+            // 로그인 시 금일 사용자 수에 집계 (중복적용 안됨)
+            countService.increaseUserCount(user.getUserNum());
+            LocalDate today = LocalDate.now();
+            UserCountDTO result = countService.getUserCountDTO(today);
 
             List<String> roles = user.getMemRoleList().stream()
                     .map(Enum::name)
@@ -181,6 +199,7 @@ public class UserController {
             responseBody.put("user", user);
             responseBody.put("accessToken", accessToken);
             responseBody.put("refreshToken", refreshToken);
+            responseBody.put("todayUserCount", result);
 
             return ResponseEntity.ok(responseBody);
         } catch (IllegalStateException e) {
