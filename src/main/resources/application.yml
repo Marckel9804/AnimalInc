@@ -38,6 +38,7 @@ spring:
   data:
     redis:
       host: localhost
+#      host: aniRedis
       port: 6379
 
 cloud:
