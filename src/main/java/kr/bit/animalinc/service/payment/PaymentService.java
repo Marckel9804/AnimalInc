@@ -6,7 +6,6 @@ import kr.bit.animalinc.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -18,55 +17,89 @@ public class PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private UserService userService; // UserService 주입
+    private UserService userService;
 
     @Transactional
-    public Payment savePayment(Payment payment) {
+    public Payment initiatePayment(String orderId, String userEmail, int amount) {
+        Payment payment = new Payment();
+        payment.setOrderId(orderId);
+        payment.setUserEmail(userEmail);
+        payment.setAmount(amount);
         payment.setPaymentDate(LocalDateTime.now());
+        payment.setStatus("PENDING"); // 결제 시도 중 상태로 설정
+
+        // 디버깅 로그 추가
+        System.out.println("Initiate Payment:");
+        System.out.println("Order ID: " + orderId);
+        System.out.println("User Email: " + userEmail);
+        System.out.println("Amount: " + amount);
+
         return paymentRepository.save(payment);
     }
 
     @Transactional
     public Payment processPaymentApproval(String paymentKey, String orderId, int amount) {
-        // 결제 승인 처리 로직
-        Payment payment = new Payment();
+        Optional<Payment> paymentOpt = paymentRepository.findByOrderId(orderId);
+        Payment payment = paymentOpt.orElseThrow(() -> new IllegalArgumentException("Invalid orderId: " + orderId));
+
         payment.setPaymentKey(paymentKey);
-        payment.setOrderId(orderId);
         payment.setAmount(amount);
-        payment.setPaymentMethod("카드"); // 예시 값
-        payment.setPaymentDate(LocalDateTime.now()); // 결제 날짜 설정
+        payment.setPaymentDate(LocalDateTime.now());
 
+        // 디버깅 로그 추가
+        System.out.println("Processing payment with amount: " + amount);
 
-        // 사용자의 이메일을 올바르게 설정
-        String userEmail = getUserEmailFromOrderId(orderId); // OrderId로 사용자 이메일 찾기
-        if (userEmail == null || userEmail.isEmpty()) {
-            // 추가 로그
-            System.err.println("Failed to find userEmail for orderId: " + orderId);
-            throw new IllegalArgumentException("User email not found for orderId: " + orderId);
-        }
-        payment.setUserEmail(userEmail);
+        // 결제 금액에 따른 루비 수량 매핑
+        int rubyAmount = mapAmountToRuby(amount);
+        System.out.println("Mapped ruby amount: " + rubyAmount);
+        payment.setRubyAmount(rubyAmount); // 결제 정보에 루비 수량 저장
 
-        // 결제 정보 저장
-        Payment savedPayment = savePayment(payment);
+        // `processPaymentApproval`에서 사용자 루비 업데이트 코드를 제거하여 중복 업데이트 방지
+        // userService.updateUserRuby(payment.getUserEmail(), rubyAmount);
 
-        // 사용자의 루비 업데이트
-        userService.updateUserRuby(userEmail, amount); // 사용자의 루비 업데이트
-
-        return savedPayment;
+        return paymentRepository.save(payment);
     }
 
-    // 실제로 orderId를 통해 사용자 이메일을 찾아야 합니다.
-    private String getUserEmailFromOrderId(String orderId) {
-        // orderId로부터 사용자 이메일을 얻는 로직 구현
-        Optional<Payment> paymentOpt = paymentRepository.findByOrderId(orderId);
-        if (paymentOpt.isPresent()) {
-            return paymentOpt.get().getUserEmail(); // 실제 이메일 반환
+    @Transactional
+    public Payment processPaymentResult(String paymentKey, String orderId, int amount, boolean isSuccess, String failureMessage) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid orderId: " + orderId));
+
+        payment.setPaymentKey(paymentKey);
+        payment.setAmount(amount);
+        payment.setPaymentDate(LocalDateTime.now());
+
+        if (isSuccess) {
+            payment.setStatus("SUCCESS");
+
+            // 루비 업데이트 로직 추가
+            int rubyAmount = mapAmountToRuby(amount);
+            System.out.println("Payment Success: Updating ruby amount to " + rubyAmount);
+            payment.setRubyAmount(rubyAmount);
+
+            // 결제가 성공하면 이곳에서 한 번만 사용자 루비를 업데이트
+            userService.updateUserRuby(payment.getUserEmail(), rubyAmount);
+        } else {
+            payment.setStatus("FAILURE");
+            payment.setFailureMessage(failureMessage);
+            System.out.println("Payment Failure: " + failureMessage);
         }
 
-        // 이메일을 찾지 못한 경우 null 반환
-        return null;
+        return paymentRepository.save(payment);
+    }
+
+    // 결제 금액에 따라 루비 수량을 매핑하는 메서드
+    private int mapAmountToRuby(int amount) {
+        switch (amount) {
+            case 1100: return 10;
+            case 3300: return 30;
+            case 5500: return 50;
+            case 7700: return 70;
+            case 9900: return 90;
+            case 11000: return 100;
+            default:
+                System.out.println("Unexpected amount: " + amount); // 예상치 못한 금액의 경우
+                return 0;
+        }
     }
 }
