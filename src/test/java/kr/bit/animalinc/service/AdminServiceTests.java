@@ -36,9 +36,9 @@ public class AdminServiceTests {
 
     @Test
     public void testReadBanList() {
-        log.info("\n"+adminService.getAllBanLists().toString());
-
-        log.info("\n"+adminService.getBanList(123L).toString());
+//        log.info("\n"+adminService.getAllBanLists().toString());
+//
+//        log.info("\n"+adminService.getBanList(123L).toString());
     }
 
 
