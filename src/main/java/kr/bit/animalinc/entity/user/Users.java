@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Users{
+public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long userNum;
@@ -47,7 +47,7 @@ public class Users{
     @JoinColumn(name = "last_gacha_result_id")
     private Animal lastGachaResult;
 
-    // 추가된 부분: 소유한 동물 목록 필드
+    // 소유한 동물 목록 필드
     @ManyToMany
     @JoinTable(
             name = "user_owned_animals",
@@ -55,33 +55,41 @@ public class Users{
             inverseJoinColumns = @JoinColumn(name = "animal_id")
     )
     private List<Animal> ownedAnimals = new ArrayList<>(); // 소유한 동물 목록
-    // 추가된 부분: 선택된 동물 필드
+
+    // 선택된 동물 필드
+
     @ManyToOne
     @JoinColumn(name = "selected_animal_id")
     private Animal selectedAnimal;  // 사용자가 선택한 동물
+
+    // 회원의 역할 목록
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<MemberRole> memRoleList = new ArrayList<>(); // 회원의 역할 목록
+
+    // 유저가 보유한 아이템 목록
+    @OneToMany(mappedBy = "qUser", cascade = CascadeType.ALL)
+    private List<BoardFAQ> boardFAQS = new ArrayList<>(); // null 방지를 위해 기본값 설정
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @Builder.Default
+    private List<UserItem> userItems = new ArrayList<>(); // 유저가 보유한 아이템 목록
+
+    // 회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다.
+    // 관리자(ADMIN)는 0으로 저장
+    public void addRole(MemberRole role) {
+        memRoleList.add(role);
+    }
+
     // 소유한 동물 목록에 동물을 추가하는 메서드
     public void addOwnedAnimal(Animal animal) {
         ownedAnimals.add(animal);
     }
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<MemberRole> memRoleList = new ArrayList<>(); // 회원의 역할 목록
 
-
-    // 유저가 보유한 아이템 목록
-    //여기서 부터
-    @OneToMany(mappedBy = "qUser" , cascade = CascadeType.ALL)
-    private List<BoardFAQ> boardFAQS;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<UserItem> userItems = new ArrayList<>();
-
-    //회원으로 회원가입하면, users_memrolelist 테이블에 usernum과 권한이 1(USER)로 저장됩니다. 관리자(ADMIN)는 0으로 저장
-    public void addRole(MemberRole role) {memRoleList.add(role);}
-
-    public void addUserItem(Item item) { //유저가 보유한 아이템에 추가
+    // 유저가 보유한 아이템에 추가
+    public void addUserItem(Item item) {
         UserItem userItem = new UserItem();
         userItem.setUser(this);
         userItem.setItem(item);
