@@ -9,6 +9,7 @@ import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.email.EmailService;
+import kr.bit.animalinc.service.game.GameService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
 import kr.bit.animalinc.util.RedisTokenService;
@@ -36,6 +37,7 @@ public class UserController {
     private final JWTUtil jwtUtil;
     private final RedisTokenService redisTokenService;
     private final CountService countService;
+    private final GameService gameService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
@@ -577,5 +579,14 @@ public class UserController {
         }
 
         return ResponseEntity.ok("Animal selected successfully");
+    }
+
+    //게임 보상
+    @GetMapping("/rewards")
+    public void getRewards(@RequestParam("userNum") Long userNum,
+                                        @RequestParam("ruby") int ruby,
+                                        @RequestParam("point") int point){
+        userService.giveRewards(userNum, ruby, point);
+
     }
 }
