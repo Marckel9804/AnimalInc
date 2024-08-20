@@ -53,6 +53,7 @@ public class GameUsersStatus {
     private int tech3;
     private int tech4;
     private int cash;
+    private int newsCount = 5;
 
     public GameUsersStatus(GameUsersStatusDTO gameUsersStatusDTO){
         this.gameRoom = gameUsersStatusDTO.getGameRoom();
@@ -85,5 +86,6 @@ public class GameUsersStatus {
         this.tech3 = gameUsersStatusDTO.getTech3();
         this.tech4 = gameUsersStatusDTO.getTech4();
         this.cash = gameUsersStatusDTO.getCash();
+        this.newsCount = gameUsersStatusDTO.getNewsCount();
     }
 }

@@ -354,6 +354,14 @@ public class UserService {
         // 변경된 사용자 정보를 데이터베이스에 저장
         userRepository.save(user);
     }
+
+    @Transactional
+    public void giveRewards(Long userNum, int ruby, int point){
+        Users user = userRepository.findById(userNum).orElseThrow(() -> new RuntimeException("User not found with userNum: " + userNum));
+        user.setUserRuby(user.getUserRuby()+ruby);
+        user.setUserPoint(user.getUserPoint()+point);
+        userRepository.save(user);
+    }
 }
 
 
