@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,7 +68,8 @@ public class RedisTestController {
         countService.increaseUserCount(userNum);
 
         LocalDate today = LocalDate.now();
-        UserCountDTO result = countService.getUserCountDTO(today);
+//        UserCountDTO result = countService.getUserCountDTO(today);
+        List<UserCountDTO> result = countService.getUCByYearMonth(2024, 8);
 
         return ResponseEntity.ok(result);
     }
