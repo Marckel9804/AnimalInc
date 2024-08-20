@@ -1,9 +1,14 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://175.209.41.173:555/animalincdb
+    url: jdbc:mysql://db-obi34-kr.vpc-pub-cdb.ntruss.com/animalincdb
     username: animalinc
-    password: 1234
+    password: '!qwer1234'
+
+  servlet:
+    multipart:
+      max-request-size: 40MB
+      max-file-size: 10MB
 
   jpa:
 
@@ -13,9 +18,45 @@ spring:
         format_sql: true
 
     hibernate:
-      ddl-auto: create
-      #      ddl-auto: update
+#      ddl-auto: create
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jason.naver.com@gmail.com
+    password: axjizmhfvidiutdy
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true
+        starttls.required: true
+
+  data:
+    redis:
+      host: localhost
+#      host: aniRedis
+      port: 6379
+
+cloud:
+  aws:
+    credentials:
+      access-key: B9A0F1108DE5EDB2C7FD
+      secret-key: 51A88C5C7068C7A9B2868B1C7C0B5F68FAB6FA46
+    stack:
+      auto: false
+    region:
+      static: kr-standard
+    s3:
+      endpoint: https://kr.object.ncloudstorage.com
+      bucket: aniinc
+
+toss:
+  payments:
+    client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+    secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+    success-url: http://localhost:8080/payments/success
+    fail-url: http://localhost:8080/payments/fail
