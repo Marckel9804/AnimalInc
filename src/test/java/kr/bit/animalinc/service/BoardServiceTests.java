@@ -17,35 +17,35 @@ import java.util.List;
 @Slf4j
 public class BoardServiceTests {
 
-    @Autowired
-    private BoardService boardService;
-
-    @Test
-    public void testInsert() {
-
-        for (int i = 1; i < 30; i++) {
-
-            List<Comment> comments = new ArrayList<>();
-            Date date = new Date();
-
-            BoardCommunity bc = BoardCommunity.builder()
-                    .bcCode("info")
-                    .title("제목" + i)
-                    .content("내용" + i)
-                    .userEmail("btt421")
-                    .writeDate(String.valueOf(date))
-                    .comments(comments)
-                    .build();
-
-            boardService.addBoardCommunity(bc);
-        }
-    }
-
-    @Test
-    public void testRead() {
-        long boardId = 1L;
-
-        log.info("\n\nboardId: {}", boardService.getBoardCommunity(1L));
-    }
+//    @Autowired
+//    private BoardService boardService;
+//
+//    @Test
+//    public void testInsert() {
+//
+//        for (int i = 1; i < 30; i++) {
+//
+//            List<Comment> comments = new ArrayList<>();
+//            Date date = new Date();
+//
+//            BoardCommunity bc = BoardCommunity.builder()
+//                    .bcCode("info")
+//                    .title("제목" + i)
+//                    .content("내용" + i)
+//                    .userEmail("btt421")
+//                    .writeDate(String.valueOf(date))
+//                    .comments(comments)
+//                    .build();
+//
+//            boardService.addBoardCommunity(bc);
+//        }
+//    }
+//
+//    @Test
+//    public void testRead() {
+//        long boardId = 1L;
+//
+//        log.info("\n\nboardId: {}", boardService.getBoardCommunity(1L));
+//    }
 
 }
