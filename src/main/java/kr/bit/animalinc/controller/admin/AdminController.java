@@ -1,11 +1,13 @@
 package kr.bit.animalinc.controller.admin;
 
 import kr.bit.animalinc.dto.admin.BanDTO;
+import kr.bit.animalinc.dto.admin.UserCountDTO;
 import kr.bit.animalinc.entity.admin.BanList;
 import kr.bit.animalinc.entity.admin.TierCount;
 import kr.bit.animalinc.entity.admin.UserCount;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.service.admin.AdminService;
+import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ public class AdminController {
 
     private final UserService userService;
     private final AdminService adminService;
+    private final CountService countService;
 
     @GetMapping("/user")
     public ResponseEntity<?> getUserList() {
@@ -64,6 +67,12 @@ public class AdminController {
     @GetMapping("/usercount/{year}/{month}")
     public ResponseEntity<?> getUserCount(@PathVariable int year, @PathVariable int month) {
         List<UserCount> result = adminService.findUSByMonth(month);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/redis/usercount/{year}/{month}")
+    public ResponseEntity<?> getRedisUserCount(@PathVariable int year, @PathVariable int month) {
+        List<UserCountDTO> result = countService.getUCByYearMonth(year, month);
         return ResponseEntity.ok(result);
     }
 

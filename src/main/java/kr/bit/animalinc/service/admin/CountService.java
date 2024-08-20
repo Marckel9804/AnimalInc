@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,5 +62,32 @@ public class CountService {
             visits = "0";
         }
         return new UserCountDTO(date, Integer.parseInt(visits));
+    }
+
+    public List<UserCountDTO> getUCByYearMonth(int year, int month) {
+
+        List<UserCountDTO> userCounts = new ArrayList<>();
+
+        // 해당 연도와 월의 첫 번째 날을 계산합니다.
+        LocalDate startDate = LocalDate.of(year, month, 1);
+
+        // 해당 연도와 월의 마지막 날을 계산합니다.
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // 날짜 범위를 반복하면서 각 날짜에 대해 레디스 키를 확인합니다.
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            String todayVisitsKey = "site:visits:" + date.toString();
+            String visits = redisTemplate.opsForValue().get(todayVisitsKey);
+
+            // visits 값이 null이면 "0"으로 설정합니다.
+            if (visits == null) {
+                visits = "0";
+            }
+
+            // UserCountDTO 객체를 생성하고 리스트에 추가합니다.
+            userCounts.add(new UserCountDTO(date, Integer.parseInt(visits)));
+        }
+
+        return userCounts;
     }
 }
