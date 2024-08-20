@@ -13,6 +13,8 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByUserNickname(String userName);
 
+    Optional<Users> findByUserNum(Long userNum);
+
     @EntityGraph(attributePaths = {"memRoleList"})
     @Query("select user from Users user where user.userEmail = :userEmail")
     Users getRole(@Param("userEmail") String userEmail);

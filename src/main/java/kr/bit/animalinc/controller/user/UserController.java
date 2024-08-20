@@ -129,10 +129,9 @@ public class UserController {
             LocalDate today = LocalDate.now();
             UserCountDTO result = countService.getUserCountDTO(today);
 
-            // 6. JWT 생성 및 Redis 저장
-            List<String> roles = user.getMemRoleList().stream()
-                    .map(Enum::name)
-                    .collect(Collectors.toList());
+        List<String> roles = user.getMemRoleList().stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
 
             UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
             Map<String, Object> claims = authenticatedUser.getClaims();
@@ -616,5 +615,14 @@ public class UserController {
         }
 
         return ResponseEntity.ok("Animal selected successfully");
+    }
+
+    //게임 보상
+    @GetMapping("/rewards")
+    public void getRewards(@RequestParam("userNum") Long userNum,
+                                        @RequestParam("ruby") int ruby,
+                                        @RequestParam("point") int point){
+        userService.giveRewards(userNum, ruby, point);
+
     }
 }
