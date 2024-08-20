@@ -48,7 +48,7 @@ public class SecurityConfig {
         corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","HEAD"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization","Cache-Control", "Content-Type"));
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization")); // 추가
-        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
