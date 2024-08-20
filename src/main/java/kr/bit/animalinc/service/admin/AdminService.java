@@ -8,12 +8,12 @@ import kr.bit.animalinc.repository.admin.TierCountRepository;
 import kr.bit.animalinc.repository.admin.UserCountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,22 +46,37 @@ public class AdminService {
 
     @Transactional
     public BanList getBanList(Long user_num) {
-        BanList result = banListRepository.findByUserNum(user_num);
-        return result;
+        return banListRepository.findByUserNum(user_num)
+                .orElse(null);  // Optional이 비어 있을 경우 null을 반환
     }
+
 
     @Transactional
     public BanList updateBanList(BanList banList) {
-        BanList result = banListRepository.save(banList);
-        return result;
+        Optional<BanList> target = banListRepository.findByUserNum(banList.getUserNum());
+
+        if (target.isPresent()) {
+            BanList existingBanList = target.get();
+            existingBanList.setBanReason(banList.getBanReason());
+            existingBanList.setUnlockDate(banList.getUnlockDate());
+            return banListRepository.save(existingBanList);
+        } else {
+            throw new RuntimeException("BanList entry not found for user_num: " + banList.getUserNum());
+        }
     }
 
     @Transactional
     public String deleteBanList(Long user_num) {
-        BanList target = banListRepository.findByUserNum(user_num);
-        banListRepository.delete(target);
-        return "success";
+        Optional<BanList> target = banListRepository.findByUserNum(user_num);
+
+        if (target.isPresent()) {
+            banListRepository.delete(target.get());
+            return "success";
+        } else {
+            return "BanList entry not found";
+        }
     }
+
 
     // TierCount에 대한 CRUD
     @Transactional

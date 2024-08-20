@@ -21,6 +21,8 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final NumberPath<Integer> amount = createNumber("amount", Integer.class);
 
+    public final StringPath failureMessage = createString("failureMessage");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath orderId = createString("orderId");
@@ -29,11 +31,11 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final StringPath paymentKey = createString("paymentKey");
 
-    public final StringPath paymentMethod = createString("paymentMethod");
+    public final NumberPath<Integer> rubyAmount = createNumber("rubyAmount", Integer.class);
 
-    public final StringPath paymentName = createString("paymentName");
+    public final StringPath status = createString("status");
 
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
+    public final StringPath userEmail = createString("userEmail");
 
     public QPayment(String variable) {
         super(Payment.class, forVariable(variable));

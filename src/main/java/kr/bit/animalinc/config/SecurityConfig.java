@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("*"));
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://223.130.160.171:3600"));
         //모든 도메인에서 요청을 허용
 
         //허용되는 Http메서드 설정
@@ -52,9 +52,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
-
         return source;
-
     }
 
     @Bean
