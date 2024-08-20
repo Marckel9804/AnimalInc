@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://223.130.160.171:3600"));
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://223.130.160.171:3600","http://bit.animalinc.site:3600"));
         //모든 도메인에서 요청을 허용
 
         //허용되는 Http메서드 설정
