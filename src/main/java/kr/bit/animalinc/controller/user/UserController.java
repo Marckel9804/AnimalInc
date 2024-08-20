@@ -295,54 +295,45 @@ public class UserController {
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtUtil.extractTokenFromCookie(request, "refreshToken");
 
-        if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
-            Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
-            Long userNum = Long.parseLong(claims.get("userNum").toString());
-
-            // Redis에서 현재 저장된 액세스 토큰을 확인
-            String currentAccessToken = redisTokenService.getAccessToken(userNum);
-
-            // 기존 액세스 토큰이 Redis에 없을 경우 (만료되었거나 삭제된 경우)
-            if (currentAccessToken == null) {
-                // 웹에 남아있는 리프레시 토큰 삭제
-                Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-                refreshTokenCookie.setHttpOnly(true);
-                refreshTokenCookie.setSecure(true);
-                refreshTokenCookie.setPath("/");
-                refreshTokenCookie.setMaxAge(0); // 쿠키 삭제
-                response.addCookie(refreshTokenCookie);
-
-                // 클라이언트에게 액세스 토큰을 삭제하라는 메시지와 함께 응답
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session expired, please log in again.");
-            }
-
-            // 새로운 액세스 토큰 생성
-            String newAccessToken = jwtUtil.generateToken(claims, 30);
-
-            // 기존 액세스 토큰을 블랙리스트에 추가하고 Redis에서 삭제
-            redisTokenService.addToBlacklist(currentAccessToken);
-            redisTokenService.deleteAccessToken(userNum);
-
-            // 새로운 액세스 토큰을 Redis에 저장
-            redisTokenService.storeAccessToken(newAccessToken, userNum, Duration.ofMinutes(30));
-
-            // 새로운 Refresh Token 생성 및 쿠키에 저장
-            String newRefreshToken = jwtUtil.generateToken(claims, 60 * 24);
-            Cookie newRefreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
-            newRefreshTokenCookie.setHttpOnly(true);
-            newRefreshTokenCookie.setSecure(true);
-            newRefreshTokenCookie.setPath("/");
-            newRefreshTokenCookie.setMaxAge(60 * 60 * 24);
-            response.addCookie(newRefreshTokenCookie);
-
-            response.setHeader("Authorization", "Bearer " + newAccessToken);
-
-            return ResponseEntity.ok("Tokens refreshed successfully");
+        // 리프레시 토큰이 유효한지 검사
+        if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
+            removeRefreshToken(response);  // 리프레시 토큰 삭제 함수 호출
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token. Please log in again.");
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
-    }
+        Map<String, Object> claims = jwtUtil.extractAllClaims(refreshToken);
+        Long userNum = Long.parseLong(claims.get("userNum").toString());
 
+        // Redis에서 현재 저장된 액세스 토큰 확인
+        String currentAccessToken = redisTokenService.getAccessToken(userNum);
+        if (currentAccessToken == null) {
+            removeRefreshToken(response);  // 리프레시 토큰 삭제 함수 호출
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session expired. Please log in again.");
+        }
+
+        // 새로운 액세스 토큰 생성
+        String newAccessToken = jwtUtil.generateToken(claims, 30);
+
+        // 기존 액세스 토큰 블랙리스트 추가 및 Redis에서 삭제
+        redisTokenService.addToBlacklist(currentAccessToken);
+        redisTokenService.deleteAccessToken(userNum);
+
+        // 새로운 액세스 토큰 Redis에 저장
+        redisTokenService.storeAccessToken(newAccessToken, userNum, Duration.ofMinutes(30));
+
+        // 새로운 리프레시 토큰 생성 및 쿠키에 저장
+        String newRefreshToken = jwtUtil.generateToken(claims, 60 * 24);
+        Cookie newRefreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
+        newRefreshTokenCookie.setHttpOnly(true);
+        newRefreshTokenCookie.setSecure(true);
+        newRefreshTokenCookie.setPath("/");
+        newRefreshTokenCookie.setMaxAge(60 * 60 * 24);
+        response.addCookie(newRefreshTokenCookie);
+
+        response.setHeader("Authorization", "Bearer " + newAccessToken);
+
+        return ResponseEntity.ok("Tokens refreshed successfully");
+    }
 
     @PostMapping("/check-profile")
     public ResponseEntity<?> completeProfile(@RequestBody Map<String, String> request, HttpServletRequest httpServletRequest) {
@@ -617,4 +608,14 @@ public class UserController {
 
         return ResponseEntity.ok("Animal selected successfully");
     }
+
+    private void removeRefreshToken(HttpServletResponse response) {
+        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0); // 쿠키 삭제
+        response.addCookie(refreshTokenCookie);
+    }
+
 }
