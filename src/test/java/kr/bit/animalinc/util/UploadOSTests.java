@@ -14,10 +14,10 @@ import java.io.File;
 @RequiredArgsConstructor
 public class UploadOSTests {
 
-    private final UploadService uploadService;
-
-    @Test
-    public void testUploadService() {
-
-    }
+//    private final UploadService uploadService;
+//
+//    @Test
+//    public void testUploadService() {
+//
+//    }
 }

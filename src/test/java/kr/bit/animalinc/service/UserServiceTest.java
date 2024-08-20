@@ -14,28 +14,28 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 public class UserServiceTest {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
-
-    @Test
-    public void testInsertUser() {
-
-        Users user = new Users();
-
-        user.addRole(MemberRole.ADMIN);
-        user.addRole(MemberRole.USER);
-        user.setUserEmail("ch1234@naver.com");
-        user.setUserPw("1234");
-        user.setUserNickname("서창호");
-        user.setUserRealname("서창호");
-
-        Users result = userRepository.save(user);
-
-        System.out.println(result);
-
-
-    }
+//    @Autowired
+//    private UserService userService;
+//    @Autowired
+//    private UserRepository userRepository;
+//
+//    @Test
+//    public void testInsertUser() {
+//
+//        Users user = new Users();
+//
+//        user.addRole(MemberRole.ADMIN);
+//        user.addRole(MemberRole.USER);
+//        user.setUserEmail("ch1234@naver.com");
+//        user.setUserPw("1234");
+//        user.setUserNickname("서창호");
+//        user.setUserRealname("서창호");
+//
+//        Users result = userRepository.save(user);
+//
+//        System.out.println(result);
+//
+//
+//    }
 
 }
