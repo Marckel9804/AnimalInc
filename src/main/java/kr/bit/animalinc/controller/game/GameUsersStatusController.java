@@ -29,12 +29,15 @@ public class GameUsersStatusController {
 
     @PostMapping("/insertUserStatus")
     public ResponseEntity<String> insertUserStatus(@RequestParam String gameRoomId, @RequestParam long userNum) {
-        // 전달된 값을 로그에 출력
         log.info("Received request to insert user status with gameRoomId: {} and userNum: {}", gameRoomId, userNum);
 
-        GameRoom gameRoom = gameRoomRepository.findById(gameRoomId).get();
-        gameUsersStatusService.saveUserStatus(gameRoom, userNum);
-        return ResponseEntity.ok("User status inserted successfully");
+        GameRoom gameRoom = gameRoomRepository.findById(gameRoomId).orElse(null);
+        if (gameRoom != null) {
+            gameUsersStatusService.saveUserStatus(gameRoom, userNum);
+            return ResponseEntity.ok("User status inserted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game room not found");
+        }
     }
 
     @PostMapping("/saveUserStatus")

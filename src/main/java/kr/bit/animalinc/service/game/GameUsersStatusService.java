@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GameUsersStatusService {
@@ -21,6 +22,7 @@ public class GameUsersStatusService {
     @Autowired
     private GameRoomRepository gameRoomRepository;
 
+    @Transactional
     public void saveUserStatus(GameRoom gameRoom, long userNum) {
         GameUsersStatus gameUsersStatus = new GameUsersStatus();
 
