@@ -4,17 +4,20 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.bit.animalinc.dto.admin.UserCountDTO;
+import kr.bit.animalinc.entity.shop.Animal;
 import kr.bit.animalinc.entity.user.UserItemDTO;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.entity.user.UsersDTO;
 import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.email.EmailService;
-import kr.bit.animalinc.service.game.GameService;
+import kr.bit.animalinc.service.shop.AnimalService;
 import kr.bit.animalinc.service.user.UserService;
 import kr.bit.animalinc.util.JWTUtil;
 import kr.bit.animalinc.util.RedisTokenService;
+import kr.bit.animalinc.util.UserBannedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -37,7 +40,6 @@ public class UserController {
     private final JWTUtil jwtUtil;
     private final RedisTokenService redisTokenService;
     private final CountService countService;
-    private final GameService gameService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
@@ -101,57 +103,73 @@ public class UserController {
         String userEmail = request.get("userEmail");
         String userPw = request.get("userPw");
 
+        // 1. 필수 입력값 확인
         if (userEmail == null || userPw == null) {
             return ResponseEntity.status(400).body("이메일과 비밀번호를 입력해주세요");
         }
 
-        Users user = userService.login(userEmail, userPw);
+        try {
+            // 2. 로그인 시도
+            Users user = userService.login(userEmail, userPw);
 
-        if (user == null) {
-            return ResponseEntity.status(401).body("이메일이나 비밀번호를 확인해주세요");
-        }
+            // 3. 로그인 실패 시 처리
+            if (user == null) {
+                return ResponseEntity.status(401).body("이메일이나 비밀번호를 확인해주세요");
+            }
 
-        // 만약 액세스토큰이 redis에 존재하면 삭제 및 블랙리스트 추가
-        String existingToken = redisTokenService.getAccessToken(user.getUserNum());
-        if (existingToken != null) {
-            redisTokenService.deleteAccessToken(user.getUserNum());
-            redisTokenService.addToBlacklist(existingToken);
-        }
+            // 4. Redis에서 기존 토큰 처리
+            String existingToken = redisTokenService.getAccessToken(user.getUserNum());
+            if (existingToken != null) {
+                redisTokenService.deleteAccessToken(user.getUserNum());
+                redisTokenService.addToBlacklist(existingToken);
+            }
 
-        // 로그인 시 금일 사용자 수에 집계 (중복적용 안됨)
-        countService.increaseUserCount(user.getUserNum());
-        LocalDate today = LocalDate.now();
-        UserCountDTO result = countService.getUserCountDTO(today);
+            // 5. 로그인 성공 시 사용자 수 집계
+            countService.increaseUserCount(user.getUserNum());
+            LocalDate today = LocalDate.now();
+            UserCountDTO result = countService.getUserCountDTO(today);
 
         List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(),user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
-        Map<String, Object> claims = authenticatedUser.getClaims();
+            UsersDTO authenticatedUser = new UsersDTO(user.getUserNum(), user.getUserEmail(), user.getUserRealname(), user.getUserNickname(), user.isSlogin(), roles);
+            Map<String, Object> claims = authenticatedUser.getClaims();
 
-        String accessToken = jwtUtil.generateToken(claims, 30);
-        String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
+            String accessToken = jwtUtil.generateToken(claims, 30); // 액세스 토큰: 30분
+            String refreshToken = jwtUtil.generateToken(claims, 60 * 24); // 리프레시 토큰: 24시간
 
-        // 생성한 액세스토큰을 redis에 저장
-        redisTokenService.storeAccessToken(accessToken, user.getUserNum(), Duration.ofMinutes(30));
+            redisTokenService.storeAccessToken(accessToken, user.getUserNum(), Duration.ofMinutes(30));
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(60 * 60 * 24);
-        response.addCookie(refreshTokenCookie);
+            // 7. 리프레시 토큰을 쿠키에 저장
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(60 * 60 * 24); // 24시간
+            response.addCookie(refreshTokenCookie);
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
+            // 8. 액세스 토큰을 헤더에 추가
+            response.setHeader("Authorization", "Bearer " + accessToken);
 
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("message", "Login successful");
-        responseBody.put("user", authenticatedUser);
-        responseBody.put("todayUserCount", result);
+            // 9. 응답 바디 구성 및 반환
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("message", "Login successful");
+            responseBody.put("user", authenticatedUser);
+            responseBody.put("todayUserCount", result);
 
-        return ResponseEntity.ok(responseBody);
+            return ResponseEntity.ok(responseBody);
+
+        } catch (UserBannedException e) {
+            // UserBannedException을 RestControllerAdvice에서 처리하도록 재던짐
+            throw e;
+        } catch (Exception e) {
+            // 그 외 예외 처리
+            log.error("Login error: {}", e.getMessage());
+            return ResponseEntity.status(500).body("An unexpected error occurred during login.");
+        }
     }
+
 
     @PostMapping("/social-login")
     public ResponseEntity<?> socialLogin(@RequestBody Map<String, String> request, HttpServletResponse response) {
@@ -207,6 +225,9 @@ public class UserController {
         } catch (IllegalStateException e) {
             log.error("Social login error: {}", e.getMessage());
             return ResponseEntity.status(400).body(e.getMessage());
+        } catch (UserBannedException e) {
+            // UserBannedException을 RestControllerAdvice에서 처리하도록 재던짐
+            throw e;
         } catch (Exception e) {
             log.error("An unexpected error occurred during social login: {}", e.getMessage());
             return ResponseEntity.status(500).body("An unexpected error occurred during social login.");
@@ -350,6 +371,8 @@ public class UserController {
         Users user = userService.completeProfile(email, birthdate, nickname);
         return ResponseEntity.ok(user);
     }
+    @Autowired
+    private AnimalService animalService;  // AnimalService 주입
 
     private boolean isValidBirthdate(String birthdate) {
         if (!birthdate.matches("\\d{4}-\\d{2}-\\d{2}")) {
@@ -409,6 +432,18 @@ public class UserController {
                         .build())
                 .collect(Collectors.toList());
 
+        // selected_animal_id로 animalImage 가져오기
+        String animalImage = null;
+        Animal selectedAnimal = user.getSelectedAnimal();
+        if (selectedAnimal != null) {
+            // int 타입의 animalId를 Long 타입으로 변환
+            Long animalId = Long.valueOf(selectedAnimal.getAnimalId());
+            Animal foundAnimal = animalService.findById(animalId);
+            if (foundAnimal != null) {
+                animalImage = foundAnimal.getAnimalImage();
+            }
+        }
+
         UsersDTO userDTO = new UsersDTO(
                 user.getUserNum(),
                 user.getUserEmail(),
@@ -425,6 +460,7 @@ public class UserController {
         userDTO.setUserRuby(user.getUserRuby());
         userDTO.setUserPicture(user.getUserPicture());
         userDTO.setUserItems(userItemDTOs);  // DTO 리스트로 설정
+        userDTO.setAnimalImage(animalImage); // 선택된 캐릭터 이미지 추가
 
         return ResponseEntity.ok(userDTO);
     }

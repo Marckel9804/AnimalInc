@@ -1,18 +1,23 @@
 package kr.bit.animalinc.service.user;
 
+import kr.bit.animalinc.entity.admin.BanList;
+import kr.bit.animalinc.entity.shop.Animal;
 import kr.bit.animalinc.entity.user.*;
-import kr.bit.animalinc.repository.payment.PaymentRepository;
+import kr.bit.animalinc.repository.admin.BanListRepository;
+import kr.bit.animalinc.repository.shop.AnimalRepository;
 import kr.bit.animalinc.repository.shop.ItemRepository;
 import kr.bit.animalinc.repository.shop.UserItemRepository;
 import kr.bit.animalinc.repository.user.UserRepository;
+import kr.bit.animalinc.util.UserBannedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import kr.bit.animalinc.entity.shop.Animal;  // 추가된 부분
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +30,8 @@ public class UserService {
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final AnimalRepository animalRepository;
+    private final BanListRepository banListRepository;
 
     @Transactional
     public Users login(String email, String password) {
@@ -33,6 +39,13 @@ public class UserService {
 
         if (optionalUser.isPresent()) {
             Users user = optionalUser.get();
+
+            //밴 여부 확인
+            Optional<BanList> banInfo = banListRepository.findByUserNum(user.getUserNum());
+            if (banInfo.isPresent()) {
+                BanList ban = banInfo.get();
+                throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+            }
 
             // 일반 로그인 여부 확인
             if (user.getPlatform() == null || "default".equals(user.getPlatform())) {
@@ -45,6 +58,7 @@ public class UserService {
         return null;
     }
 
+    @Transactional
     public Users register(Users user) {
         user.setUserPw(passwordEncoder.encode(user.getUserPw()));
 
@@ -52,7 +66,11 @@ public class UserService {
         user.addRole(MemberRole.USER);
         user.setPlatform("default"); // 플랫폼을 "default"로 설정
 
-        return userRepository.save(user);
+        Users registeredUser = userRepository.save(user);
+
+        setDefaultAnimal(registeredUser, 1);
+
+        return registeredUser;
     }
 
     public boolean checkEmailExists(String email) {
@@ -76,7 +94,12 @@ public class UserService {
             if (!user.getPlatform().equals(platform)) {
                 throw new IllegalStateException("이미 해당 이메일로 " + getRegisteredMethod(email) + "에서 가입하셨습니다.");
             }
-            log.info("User already exists with email: {}", email);
+
+            Optional<BanList> banInfo = banListRepository.findByUserNum(user.getUserNum());
+            if (banInfo.isPresent()) {
+                BanList ban = banInfo.get();
+                throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+            }
         } else {
             synchronized (this) {
                 optionalUser = userRepository.findByUserEmail(email);
@@ -139,7 +162,11 @@ public class UserService {
             Users user = optionalUser.get();
             user.setUserBirthdate(LocalDate.parse(birthdate));
             user.setUserNickname(nickname);
-            return userRepository.save(user);
+            Users updatedUser = userRepository.save(user);
+
+            setDefaultAnimal(updatedUser, 1);
+
+            return updatedUser;
         } else {
             throw new IllegalStateException("User not found");
         }
@@ -163,7 +190,16 @@ public class UserService {
             Users user = optionalUser.get();
             user.setUserRealname(userRealname);
             user.setUserNickname(userNickname);
-            user.setUserBirthdate(LocalDate.parse(userBirthdate));
+
+            try {
+                // yyyyMMdd 형식의 문자열을 LocalDate로 변환
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                LocalDate parsedDate = LocalDate.parse(userBirthdate, formatter);
+                user.setUserBirthdate(parsedDate);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid birthdate format. Please use 'yyyyMMdd' format.");
+            }
+
             return userRepository.save(user);
         }
         return null;
@@ -199,7 +235,7 @@ public class UserService {
     public List<UsersDTO> getRankings() {
         List<Users> users = userRepository.findAll();
         return users.stream()
-                .filter(user -> user.getUserGrade() != null && user.getUserPoint() > 0)
+                .filter(user -> user.getUserGrade() != null && user.getUserPoint() >= 0)
                 .sorted((u1, u2) -> {
                     int gradeComparison = compareGrade(u2.getUserGrade(), u1.getUserGrade());
                     return gradeComparison != 0 ? gradeComparison : Integer.compare(u2.getUserPoint(), u1.getUserPoint());
@@ -296,6 +332,24 @@ public class UserService {
 
         // 새로운 루비 수량을 사용자 엔터티에 설정
         user.setUserRuby(newRubyAmount);
+
+        // 변경된 사용자 정보를 데이터베이스에 저장
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void setDefaultAnimal(Users user, int defaultAnimalId) {
+        // 기본 동물을 데이터베이스에서 조회
+        Animal defaultAnimal = animalRepository.findById(defaultAnimalId)
+                .orElseThrow(() -> new RuntimeException("Default Animal not found with id: " + defaultAnimalId));
+
+        // 사용자의 소유 동물 목록에 기본 동물이 없을 경우 추가
+        if (user.getOwnedAnimals().stream().noneMatch(animal -> animal.getAnimalId() == defaultAnimalId)) {
+            user.addOwnedAnimal(defaultAnimal);
+        }
+
+        // 사용자의 선택된 동물로 기본 동물 설정
+        user.setSelectedAnimal(defaultAnimal);
 
         // 변경된 사용자 정보를 데이터베이스에 저장
         userRepository.save(user);
