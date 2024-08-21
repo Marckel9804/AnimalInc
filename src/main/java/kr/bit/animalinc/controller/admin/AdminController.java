@@ -11,6 +11,7 @@ import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,12 +49,15 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/ban")
-    public ResponseEntity<?> updateBan(@RequestBody BanList banList) {
-        BanList before = adminService.getBanList(banList.getUserNum());
-        before.setBanReason(banList.getBanReason());
-        before.setUnlockDate(banList.getUnlockDate());
-        BanList result = adminService.updateBanList(before);
+    @PutMapping("/ban/{banId}")
+    public ResponseEntity<?> updateBan(@PathVariable Long banId, @RequestBody BanList banList) {
+        BanList existingBan = adminService.getBanList(banList.getUserNum());
+        if (existingBan == null || !existingBan.getBanId().equals(banId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ban record not found");
+        }
+        existingBan.setBanReason(banList.getBanReason());
+        existingBan.setUnlockDate(banList.getUnlockDate());
+        BanList result = adminService.updateBanList(existingBan);
 
         return ResponseEntity.ok(result);
     }
