@@ -1,8 +1,14 @@
 package kr.bit.animalinc.entity.admin;
 
-import jakarta.persistence.*;
-import kr.bit.animalinc.dto.admin.BanDTO;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -20,8 +26,11 @@ public class BanList {
 
     private Long userNum;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date unlockDate;
     private String banReason;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date bannedDate;
 
 

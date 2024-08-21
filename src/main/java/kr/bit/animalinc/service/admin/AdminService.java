@@ -34,6 +34,8 @@ public class AdminService {
 
     @Transactional
     public List<BanList> getAllBanLists() {
+        checkAndUpdateBanStatus();
+
         List<BanList> banLists = banListRepository.findAll();
         String result = "\nBan List : \n\t"
                 + banLists.stream()
@@ -46,8 +48,15 @@ public class AdminService {
 
     @Transactional
     public BanList getBanList(Long user_num) {
-        return banListRepository.findByUserNum(user_num)
+        BanList banList = banListRepository.findByUserNum(user_num)
                 .orElse(null);  // Optional이 비어 있을 경우 null을 반환
+
+        if (banList != null && isBanExpired(banList)) {
+            banListRepository.delete(banList);
+            return null;
+        }
+
+        return banList;
     }
 
 
@@ -174,5 +183,19 @@ public class AdminService {
     public List<TierCount> findTC(int year,int month) {
         List<TierCount> result = tierCountRepository.findByYearAndMonth(year,month);
         return result;
+    }
+
+    @Transactional
+    public void checkAndUpdateBanStatus() {
+        List<BanList> banLists = banListRepository.findAll();
+        for (BanList banList : banLists) {
+            if (isBanExpired(banList)) {
+                banListRepository.delete(banList);
+            }
+        }
+    }
+
+    private boolean isBanExpired(BanList banList) {
+        return banList.getUnlockDate().before(new Date());
     }
 }
