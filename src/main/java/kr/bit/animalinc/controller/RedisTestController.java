@@ -1,20 +1,15 @@
 package kr.bit.animalinc.controller;
 
-import kr.bit.animalinc.dto.admin.UserCountDTO;
-import kr.bit.animalinc.entity.user.Users;
+import kr.bit.animalinc.dto.admin.CountDTO;
 import kr.bit.animalinc.repository.user.UserRepository;
 import kr.bit.animalinc.service.admin.CountService;
-import kr.bit.animalinc.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -69,7 +64,7 @@ public class RedisTestController {
 
         LocalDate today = LocalDate.now();
 //        UserCountDTO result = countService.getUserCountDTO(today);
-        List<UserCountDTO> result = countService.getUCByYearMonth(2024, 8);
+        List<CountDTO> result = countService.getUCByYearMonth(2024, 8);
 
         return ResponseEntity.ok(result);
     }

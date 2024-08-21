@@ -1,12 +1,6 @@
 package kr.bit.animalinc.service;
 
-import kr.bit.animalinc.dto.admin.UserCountDTO;
-import kr.bit.animalinc.service.admin.CountService;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 @SpringBootTest
 public class CountServiceTests {
