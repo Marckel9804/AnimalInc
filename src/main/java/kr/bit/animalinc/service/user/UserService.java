@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,7 +45,12 @@ public class UserService {
             Optional<BanList> banInfo = banListRepository.findByUserNum(user.getUserNum());
             if (banInfo.isPresent()) {
                 BanList ban = banInfo.get();
-                throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+                if (ban.getUnlockDate().before(new Date())) {
+                    banListRepository.delete(ban);
+                    banListRepository.flush();
+                } else {
+                    throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+                }
             }
 
             // 일반 로그인 여부 확인
@@ -98,7 +104,16 @@ public class UserService {
             Optional<BanList> banInfo = banListRepository.findByUserNum(user.getUserNum());
             if (banInfo.isPresent()) {
                 BanList ban = banInfo.get();
-                throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+                log.info("Checking ban for userNum: {}", user.getUserNum());
+                if (ban.getUnlockDate().before(new Date())) {
+                    log.info("Ban expired, removing ban for userNum: {}", user.getUserNum());
+                    banListRepository.delete(ban);
+                    banListRepository.flush();  // 추가
+                } else {
+                    log.info("Ban still active for userNum: {} until {}", user.getUserNum(), ban.getUnlockDate());
+                    throw new UserBannedException(ban.getBanReason(), ban.getUnlockDate());
+                }
+
             }
         } else {
             synchronized (this) {
