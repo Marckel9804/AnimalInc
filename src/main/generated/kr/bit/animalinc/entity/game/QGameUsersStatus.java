@@ -58,6 +58,8 @@ public class QGameUsersStatus extends EntityPathBase<GameUsersStatus> {
 
     public final NumberPath<Integer> lottery = createNumber("lottery", Integer.class);
 
+    public final NumberPath<Integer> newsCount = createNumber("newsCount", Integer.class);
+
     public final NumberPath<Integer> ship1 = createNumber("ship1", Integer.class);
 
     public final NumberPath<Integer> ship2 = createNumber("ship2", Integer.class);

@@ -5,12 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCountDTO {
+public class CountDTO {
     private LocalDate date;
-    private int userCount;
+    private int count;
 }

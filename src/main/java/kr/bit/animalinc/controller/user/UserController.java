@@ -3,7 +3,7 @@ package kr.bit.animalinc.controller.user;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.bit.animalinc.dto.admin.UserCountDTO;
+import kr.bit.animalinc.dto.admin.CountDTO;
 import kr.bit.animalinc.entity.shop.Animal;
 import kr.bit.animalinc.entity.user.UserItemDTO;
 import kr.bit.animalinc.entity.user.Users;
@@ -127,7 +127,7 @@ public class UserController {
             // 5. 로그인 성공 시 사용자 수 집계
             countService.increaseUserCount(user.getUserNum());
             LocalDate today = LocalDate.now();
-            UserCountDTO result = countService.getUserCountDTO(today);
+            CountDTO result = countService.getUserCountDTO(today);
 
             List<String> roles = user.getMemRoleList().stream()
                 .map(Enum::name)
@@ -190,7 +190,7 @@ public class UserController {
             // 로그인 시 금일 사용자 수에 집계 (중복적용 안됨)
             countService.increaseUserCount(user.getUserNum());
             LocalDate today = LocalDate.now();
-            UserCountDTO result = countService.getUserCountDTO(today);
+            CountDTO result = countService.getUserCountDTO(today);
 
             List<String> roles = user.getMemRoleList().stream()
                     .map(Enum::name)
@@ -538,7 +538,7 @@ public class UserController {
 
         usersDTO.setUserGrade(user.getUserGrade());
         usersDTO.setUserPoint(user.getUserPoint());
-
+        usersDTO.setUserPicture(user.getUserPicture());
         return ResponseEntity.ok(usersDTO);
     }
 

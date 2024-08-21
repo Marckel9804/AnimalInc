@@ -1,11 +1,13 @@
 package kr.bit.animalinc.controller.admin;
 
 import kr.bit.animalinc.dto.admin.BanDTO;
+import kr.bit.animalinc.dto.admin.CountDTO;
 import kr.bit.animalinc.entity.admin.BanList;
 import kr.bit.animalinc.entity.admin.TierCount;
 import kr.bit.animalinc.entity.admin.UserCount;
 import kr.bit.animalinc.entity.user.Users;
 import kr.bit.animalinc.service.admin.AdminService;
+import kr.bit.animalinc.service.admin.CountService;
 import kr.bit.animalinc.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ public class AdminController {
 
     private final UserService userService;
     private final AdminService adminService;
+    private final CountService countService;
 
     @GetMapping("/user")
     public ResponseEntity<?> getUserList() {
@@ -71,10 +74,22 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/redis/usercount/{year}/{month}")
+    public ResponseEntity<?> getRedisUserCount(@PathVariable int year, @PathVariable int month) {
+        List<CountDTO> result = countService.getUCByYearMonth(year, month);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/tiercount/{year}/{month}")
     public ResponseEntity<?> getTierCount(@PathVariable int year, @PathVariable int month) {
         List<TierCount> result = adminService.findTC(year,month);
         System.out.println(result);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/redis/reportcount/{year}/{month}")
+    public ResponseEntity<?> getRedisReportCount(@PathVariable int year, @PathVariable int month) {
+        List<CountDTO> result = countService.getRCByYearMonth(year, month);
         return ResponseEntity.ok(result);
     }
 }
